@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Roth QLAC Scenario - Step 2: Income & Balance Projections</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --border: #cbd5e1;
+      --header-bg: #f1f5f9;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: var(--primary);
+    }
+
+    .btn-back {
+      background-color: #64748b;
+      color: white;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .btn-back:hover {
+      background-color: #475569;
+    }
+
+    /* Input Summary Cards */
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .card .label {
+      font-size: 0.8rem;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .card .value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 4px;
+    }
+
+    /* Table Styling */
+    .table-container {
+      background: var(--card-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      text-align: right;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e2e8f0;
+      white-space: nowrap;
+    }
+
+    th {
+      background-color: var(--header-bg);
+      color: #334155;
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+    }
+
+    th.text-left, td.text-left {
+      text-align: left;
+    }
+
+    tbody tr:hover {
+      background-color: #f8fafc;
+    }
+
+    .highlight-col {
+      background-color: #f1f5f9;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header-bar">
+      <h1>Retirement Income & Balance Projection</h1>
+      <a href="index.html" class="btn-back">← Edit Inputs</a>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <div class="card">
+        <div class="label">Husband / Wife Age</div>
+        <div class="value" id="cardAges">-- / --</div>
+      </div>
+      <div class="card">
+        <div class="label">Starting IRA / 401(k)</div>
+        <div class="value" id="cardIra">--</div>
+      </div>
+      <div class="card">
+        <div class="label">Starting Roth Balance</div>
+        <div class="value" id="cardRoth">--</div>
+      </div>
+      <div class="card">
+        <div class="label">Growth Rate / Bracket</div>
+        <div class="value" id="cardGrowth">--</div>
+      </div>
+    </div>
+
+    <!-- Projection Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th class="text-left">Year</th>
+            <th>Husband Age</th>
+            <th>Wife Age</th>
+            <th>Target Conv. Cap</th>
+            <th>Husband Conv.</th>
+            <th>Wife Conv.</th>
+            <th>QLAC Income</th>
+            <th>Husband RMD</th>
+            <th>Wife RMD</th>
+            <th>Combined RMD</th>
+            <th class="highlight-col">Husband Ending IRA</th>
+            <th class="highlight-col">Wife Ending IRA</th>
+            <th class="highlight-col">Combined Ending IRA</th>
+          </tr>
+        </thead>
+        <tbody id="projectionTableBody">
+          <!-- Dynamically Generated via JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Uniform Lifetime Table IRS Factors (Ages 75 - 100)
+    const irsTable = {
+      75: 24.6, 76: 23.7, 77: 22.9, 78: 22.0, 79: 21.1,
+      80: 20.2, 81: 19.4, 82: 18.5, 83: 17.7, 84: 16.8,
+      85: 16.0, 86: 15.2, 87: 14.4, 88: 13.7, 89: 12.9,
+      90: 12.2, 91: 11.5, 92: 10.8, 93: 10.1, 94: 9.5,
+      95: 8.9,  96: 8.4,  97: 7.8,  98: 7.3,  99: 6.8, 100: 6.4
+    };
+
+    // Bracket ceiling schedule starting reference values
+    const taxBrackets = [
+      211400, 216685, 222102, 227655, 233346, 239180, 245159, 251288,
+      257570, 264010, 270610, 277375, 284309, 291417, 298702, 306170
+    ];
+
+    const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedData = localStorage.getItem('rothQlacInputs');
+      if (!savedData) {
+        alert('No input data found. Redirecting to input page.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const inputs = JSON.parse(savedData);
+
+      // Render Summary Cards
+      document.getElementById('cardAges').textContent = `${inputs.husbandAge} / ${inputs.wifeAge}`;
+      document.getElementById('cardIra').textContent = fmt.format(inputs.husbandIra + inputs.wifeIra);
+      document.getElementById('cardRoth').textContent = fmt.format(inputs.husbandRoth + inputs.wifeRoth);
+      document.getElementById('cardGrowth').textContent = `${inputs.growthRate}% / ${inputs.targetTaxBracket}%`;
+
+      // Run Projection Engine
+      runProjection(inputs);
+    });
+
+    function runProjection(inputs) {
+      const tableBody = document.getElementById('projectionTableBody');
+      tableBody.innerHTML = '';
+
+      let husbandIra = inputs.husbandIra;
+      let wifeIra = inputs.wifeIra;
+      const qlacPurchase = 210000;
+      let qlacDeducted = false;
+
+      const currentYear = new Date().getFullYear();
+
+      for (let i = 0; i < 25; i++) {
+        const year = currentYear + i;
+        const hAge = inputs.husbandAge + i;
+        const wAge = inputs.wifeAge + i;
+
+        // Apply QLAC purchase deduction on year 1
+        if (!qlacDeducted) {
+          husbandIra = Math.max(0, husbandIra - qlacPurchase);
+          qlacDeducted = true;
+        }
+
+        // Bracket Ceiling Calculation
+        const bracketCeiling = taxBrackets[i] || taxBrackets[taxBrackets.length - 1] * Math.pow(1.025, i - taxBrackets.length + 1);
+        const maxConvCap = bracketCeiling * (inputs.targetPctCeiling / 100);
+
+        const husbandConv = maxConvCap * (inputs.husbandConversionPct / 100);
+        const wifeConv = maxConvCap * (inputs.wifeConversionPct / 100);
+
+        // QLAC Income starting at Husband Age 74
+        const qlacIncome = (hAge >= 74) ? 28200 : 0;
+
+        // RMD Calculations (RMD age threshold = 75)
+        let husbandRmd = 0;
+        if (hAge >= 75 && irsTable[hAge]) {
+          husbandRmd = husbandIra / irsTable[hAge];
+        }
+
+        let wifeRmd = 0;
+        if (wAge >= 75 && irsTable[wAge]) {
+          wifeRmd = wifeIra / irsTable[wAge];
+        }
+
+        const combinedRmd = husbandRmd + wifeRmd;
+
+        // Balance Growth Calculations
+        const growthFactor = 1 + (inputs.growthRate / 100);
+        husbandIra = Math.max(0, (husbandIra - husbandConv - husbandRmd) * growthFactor);
+        wifeIra = Math.max(0, (wifeIra - wifeConv - wifeRmd) * growthFactor);
+        const combinedIra = husbandIra + wifeIra;
+
+        // Build Table Row
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="text-left">${year}</td>
+          <td>${hAge}</td>
+          <td>${wAge}</td>
+          <td>${fmt.format(maxConvCap)}</td>
+          <td>${fmt.format(husbandConv)}</td>
+          <td>${fmt.format(wifeConv)}</td>
+          <td>${fmt.format(qlacIncome)}</td>
+          <td>${fmt.format(husbandRmd)}</td>
+          <td>${fmt.format(wifeRmd)}</td>
+          <td>${fmt.format(combinedRmd)}</td>
+          <td class="highlight-col">${fmt.format(husbandIra)}</td>
+          <td class="highlight-col">${fmt.format(wifeIra)}</td>
+          <td class="highlight-col">${fmt.format(combinedIra)}</td>
+        `;
+        tableBody.appendChild(row);
+      }
+    }
+  </script>
+</body>
+</html>

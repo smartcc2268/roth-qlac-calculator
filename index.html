@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Roth QLAC Scenario - Step 1: Inputs</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --border: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background: var(--card-bg);
+      max-width: 650px;
+      width: 100%;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    p.subtitle {
+      font-size: 0.95rem;
+      color: #64748b;
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 20px;
+      margin-bottom: 12px;
+      padding-bottom: 4px;
+      border-bottom: 2px solid #e2e8f0;
+      color: #334155;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 16px;
+    }
+
+    label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #475569;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper span.prefix,
+    .input-wrapper span.suffix {
+      position: absolute;
+      color: #64748b;
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    .input-wrapper span.prefix { left: 12px; }
+    .input-wrapper span.suffix { right: 12px; }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    /* Padding adjustments for prefixes/suffixes */
+    input.has-prefix { padding-left: 28px; }
+    input.has-suffix { padding-right: 28px; }
+
+    input[type="number"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background-color: var(--primary);
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 24px;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-submit:hover {
+      background-color: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Roth QLAC Scenario Inputs</h1>
+    <p class="subtitle">Enter your starting balances, ages, conversion split, growth rate, and tax targets below to run the projection.</p>
+
+    <form id="scenario-form">
+      
+      <!-- Current Ages -->
+      <div class="section-title">Current Ages</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="husbandAge">Husband Age</label>
+          <input type="number" id="husbandAge" required min="18" max="100" value="68">
+        </div>
+        <div class="form-group">
+          <label for="wifeAge">Wife Age</label>
+          <input type="number" id="wifeAge" required min="18" max="100" value="65">
+        </div>
+      </div>
+
+      <!-- IRA / 401(k) Starting Balances -->
+      <div class="section-title">Traditional IRA / 401(k) Balances</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="husbandIra">Husband Balance</label>
+          <div class="input-wrapper">
+            <span class="prefix">$</span>
+            <input type="number" id="husbandIra" class="has-prefix" required min="0" step="1000" value="3000000">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="wifeIra">Wife Balance</label>
+          <div class="input-wrapper">
+            <span class="prefix">$</span>
+            <input type="number" id="wifeIra" class="has-prefix" required min="0" step="1000" value="2000000">
+          </div>
+        </div>
+      </div>
+
+      <!-- Roth Conversion Split -->
+      <div class="section-title">Roth Conversion Percentage</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="husbandConversionPct">Husband Conversion Share</label>
+          <div class="input-wrapper">
+            <input type="number" id="husbandConversionPct" class="has-suffix" required min="0" max="100" step="1" value="75">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="wifeConversionPct">Wife Conversion Share</label>
+          <div class="input-wrapper">
+            <input type="number" id="wifeConversionPct" class="has-suffix" required min="0" max="100" step="1" value="25">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Roth Account Starting Balances -->
+      <div class="section-title">Roth Balances</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="husbandRoth">Husband Roth</label>
+          <div class="input-wrapper">
+            <span class="prefix">$</span>
+            <input type="number" id="husbandRoth" class="has-prefix" required min="0" step="1000" value="157000">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="wifeRoth">Wife Roth</label>
+          <div class="input-wrapper">
+            <span class="prefix">$</span>
+            <input type="number" id="wifeRoth" class="has-prefix" required min="0" step="1000" value="75000">
+          </div>
+        </div>
+      </div>
+
+      <!-- Growth & Tax Targets -->
+      <div class="section-title">Growth & Tax Settings</div>
+      <div class="form-group">
+        <label for="growthRate">Average Growth Rate</label>
+        <div class="input-wrapper">
+          <input type="number" id="growthRate" class="has-suffix" required min="0" max="30" step="0.1" value="6.0">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="targetTaxBracket">Target Tax Bracket</label>
+          <div class="input-wrapper">
+            <input type="number" id="targetTaxBracket" class="has-suffix" required min="0" max="50" step="1" value="22">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="targetPctCeiling">Target % to Ceiling</label>
+          <div class="input-wrapper">
+            <input type="number" id="targetPctCeiling" class="has-suffix" required min="1" max="100" step="1" value="91">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">Save & View Results →</button>
+    </form>
+  </div>
+
+  <script>
+    // Load existing values from localStorage if available
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedData = localStorage.getItem('rothQlacInputs');
+      if (savedData) {
+        const data = JSON.parse(savedData);
+        document.getElementById('husbandAge').value = data.husbandAge ?? 68;
+        document.getElementById('wifeAge').value = data.wifeAge ?? 65;
+        document.getElementById('husbandIra').value = data.husbandIra ?? 3000000;
+        document.getElementById('wifeIra').value = data.wifeIra ?? 2000000;
+        document.getElementById('husbandConversionPct').value = data.husbandConversionPct ?? 75;
+        document.getElementById('wifeConversionPct').value = data.wifeConversionPct ?? 25;
+        document.getElementById('husbandRoth').value = data.husbandRoth ?? 157000;
+        document.getElementById('wifeRoth').value = data.wifeRoth ?? 75000;
+        document.getElementById('growthRate').value = data.growthRate ?? 6.0;
+        document.getElementById('targetTaxBracket').value = data.targetTaxBracket ?? 22;
+        document.getElementById('targetPctCeiling').value = data.targetPctCeiling ?? 91;
+      }
+    });
+
+    // Save inputs to localStorage and navigate to results page
+    document.getElementById('scenario-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const inputs = {
+        husbandAge: parseFloat(document.getElementById('husbandAge').value),
+        wifeAge: parseFloat(document.getElementById('wifeAge').value),
+        husbandIra: parseFloat(document.getElementById('husbandIra').value),
+        wifeIra: parseFloat(document.getElementById('wifeIra').value),
+        husbandConversionPct: parseFloat(document.getElementById('husbandConversionPct').value),
+        wifeConversionPct: parseFloat(document.getElementById('wifeConversionPct').value),
+        husbandRoth: parseFloat(document.getElementById('husbandRoth').value),
+        wifeRoth: parseFloat(document.getElementById('wifeRoth').value),
+        growthRate: parseFloat(document.getElementById('growthRate').value),
+        targetTaxBracket: parseFloat(document.getElementById('targetTaxBracket').value),
+        targetPctCeiling: parseFloat(document.getElementById('targetPctCeiling').value)
+      };
+
+      localStorage.setItem('rothQlacInputs', JSON.stringify(inputs));
+      
+      // Redirect to Page 2 (results.html)
+      window.location.href = 'results.html';
+    });
+  </script>
+</body>
+</html>
