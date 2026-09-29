@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Roth QLAC Scenario - Step 1: Inputs</title>
+  <title>Roth Scenario - Step 1: Inputs</title>
   <style>
     :root {
       --primary: #1e3a8a;
@@ -33,7 +33,7 @@
 
     .container {
       background: var(--card-bg);
-      max-width: 650px;
+      max-width: 680px;
       width: 100%;
       padding: 32px;
       border-radius: 12px;
@@ -41,10 +41,27 @@
       border: 1px solid #e2e8f0;
     }
 
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .icon-btn {
+      text-decoration: none;
+      font-size: 1.5rem;
+      color: #475569;
+      transition: color 0.2s;
+    }
+
+    .icon-btn:hover {
+      color: var(--primary);
+    }
+
     h1 {
       font-size: 1.6rem;
       color: var(--primary);
-      margin-bottom: 8px;
     }
 
     p.subtitle {
@@ -67,6 +84,12 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
     }
 
     .form-group {
@@ -109,7 +132,6 @@
       transition: border-color 0.2s ease;
     }
 
-    /* Padding adjustments for prefixes/suffixes */
     input.has-prefix { padding-left: 28px; }
     input.has-suffix { padding-right: 28px; }
 
@@ -140,8 +162,12 @@
 <body>
 
   <div class="container">
-    <h1>Roth QLAC Scenario Inputs</h1>
-    <p class="subtitle">Enter your starting balances, ages, conversion split, growth rate, and tax targets below to run the projection.</p>
+    <div class="header-bar">
+      <a href="settings.html" class="icon-btn" title="System Settings">⚙</a>
+      <h1>Roth Scenario Inputs</h1>
+      <div style="width: 24px;"></div>
+    </div>
+    <p class="subtitle">Enter your balances, income, QLAC settings, conversion splits, and multi-stage tax targets.</p>
 
     <form id="scenario-form">
       
@@ -158,22 +184,70 @@
         </div>
       </div>
 
-      <!-- IRA / 401(k) Starting Balances -->
+      <!-- Traditional IRA Balances -->
       <div class="section-title">Traditional IRA / 401(k) Balances</div>
       <div class="grid-2">
         <div class="form-group">
           <label for="husbandIra">Husband Balance</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="husbandIra" class="has-prefix" required min="0" step="1000" value="3000000">
+            <input type="number" id="husbandIra" class="has-prefix" required min="0" step="100" value="3000000">
           </div>
         </div>
         <div class="form-group">
           <label for="wifeIra">Wife Balance</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="wifeIra" class="has-prefix" required min="0" step="1000" value="2000000">
+            <input type="number" id="wifeIra" class="has-prefix" required min="0" step="100" value="2000000">
           </div>
+        </div>
+      </div>
+
+      <!-- Roth Balances -->
+      <div class="section-title">Roth Balances</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="husbandRoth">Husband Roth</label>
+          <div class="input-wrapper">
+            <span class="prefix">$</span>
+            <input type="number" id="husbandRoth" class="has-prefix" required min="0" step="100" value="157000">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="wifeRoth">Wife Roth</label>
+          <div class="input-wrapper">
+            <span class="prefix">$</span>
+            <input type="number" id="wifeRoth" class="has-prefix" required min="0" step="100" value="75000">
+          </div>
+        </div>
+      </div>
+
+      <!-- QLAC Purchases -->
+      <div class="section-title">QLAC Purchases</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="husbandQlac">Husband QLAC Amount</label>
+          <div class="input-wrapper">
+            <span class="prefix">$</span>
+            <input type="number" id="husbandQlac" class="has-prefix" required min="0" step="1000" value="210000">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="husbandQlacAge">Husband QLAC Purchase Age</label>
+          <input type="number" id="husbandQlacAge" required min="50" max="85" value="74">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="wifeQlac">Wife QLAC Amount</label>
+          <div class="input-wrapper">
+            <span class="prefix">$</span>
+            <input type="number" id="wifeQlac" class="has-prefix" required min="0" step="1000" value="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="wifeQlacAge">Wife QLAC Purchase Age</label>
+          <input type="number" id="wifeQlacAge" required min="50" max="85" value="74">
         </div>
       </div>
 
@@ -196,27 +270,46 @@
         </div>
       </div>
 
-      <!-- Roth Account Starting Balances -->
-      <div class="section-title">Roth Balances</div>
+      <!-- Income Streams -->
+      <div class="section-title">Income Sources</div>
+      <div class="form-group">
+        <label for="ordinaryIncome">Household Ordinary Income</label>
+        <div class="input-wrapper">
+          <span class="prefix">$</span>
+          <input type="number" id="ordinaryIncome" class="has-prefix" required min="0" step="500" value="120000">
+        </div>
+      </div>
+
       <div class="grid-2">
         <div class="form-group">
-          <label for="husbandRoth">Husband Roth</label>
+          <label for="husbandSsi">Husband Social Security (Annual)</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="husbandRoth" class="has-prefix" required min="0" step="1000" value="157000">
+            <input type="number" id="husbandSsi" class="has-prefix" required min="0" step="100" value="0">
           </div>
         </div>
         <div class="form-group">
-          <label for="wifeRoth">Wife Roth</label>
+          <label for="wifeSsi">Wife Social Security (Annual)</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="wifeRoth" class="has-prefix" required min="0" step="1000" value="75000">
+            <input type="number" id="wifeSsi" class="has-prefix" required min="0" step="100" value="0">
           </div>
         </div>
       </div>
 
-      <!-- Growth & Tax Targets -->
-      <div class="section-title">Growth & Tax Settings</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="husbandSsiStartAge">Husband SSI Start Age</label>
+          <input type="number" id="husbandSsiStartAge" required min="60" max="75" value="70">
+        </div>
+        <div class="form-group">
+          <label for="wifeSsiStartAge">Wife SSI Start Age</label>
+          <input type="number" id="wifeSsiStartAge" required min="60" max="75" value="70">
+        </div>
+      </div>
+
+      <!-- Multi-Stage Tax Targets & Growth -->
+      <div class="section-title">Growth Rate & Multi-Stage Tax Targets</div>
       <div class="form-group">
         <label for="growthRate">Average Growth Rate</label>
         <div class="input-wrapper">
@@ -225,20 +318,32 @@
         </div>
       </div>
 
-      <div class="grid-2">
+      <div class="grid-3">
         <div class="form-group">
-          <label for="targetTaxBracket">Target Tax Bracket</label>
+          <label for="currentTaxBracket">Current Target Bracket</label>
           <div class="input-wrapper">
-            <input type="number" id="targetTaxBracket" class="has-suffix" required min="0" max="50" step="1" value="22">
+            <input type="number" id="currentTaxBracket" class="has-suffix" required min="0" max="50" step="1" value="22">
             <span class="suffix">%</span>
           </div>
         </div>
         <div class="form-group">
-          <label for="targetPctCeiling">Target % to Ceiling</label>
+          <label for="yearsUntilSwitch">Switch After Years (X)</label>
+          <input type="number" id="yearsUntilSwitch" required min="0" max="25" step="1" value="3">
+        </div>
+        <div class="form-group">
+          <label for="futureTaxBracket">Future Target Bracket</label>
           <div class="input-wrapper">
-            <input type="number" id="targetPctCeiling" class="has-suffix" required min="1" max="100" step="1" value="91">
+            <input type="number" id="futureTaxBracket" class="has-suffix" required min="0" max="50" step="1" value="24">
             <span class="suffix">%</span>
           </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="targetPctCeiling">Target % to Ceiling (P)</label>
+        <div class="input-wrapper">
+          <input type="number" id="targetPctCeiling" class="has-suffix" required min="1" max="100" step="1" value="91">
+          <span class="suffix">%</span>
         </div>
       </div>
 
@@ -247,7 +352,6 @@
   </div>
 
   <script>
-    // Load existing values from localStorage if available
     window.addEventListener('DOMContentLoaded', () => {
       const savedData = localStorage.getItem('rothQlacInputs');
       if (savedData) {
@@ -256,17 +360,27 @@
         document.getElementById('wifeAge').value = data.wifeAge ?? 65;
         document.getElementById('husbandIra').value = data.husbandIra ?? 3000000;
         document.getElementById('wifeIra').value = data.wifeIra ?? 2000000;
-        document.getElementById('husbandConversionPct').value = data.husbandConversionPct ?? 75;
-        document.getElementById('wifeConversionPct').value = data.wifeConversionPct ?? 25;
         document.getElementById('husbandRoth').value = data.husbandRoth ?? 157000;
         document.getElementById('wifeRoth').value = data.wifeRoth ?? 75000;
+        document.getElementById('husbandQlac').value = data.husbandQlac ?? 210000;
+        document.getElementById('husbandQlacAge').value = data.husbandQlacAge ?? 74;
+        document.getElementById('wifeQlac').value = data.wifeQlac ?? 0;
+        document.getElementById('wifeQlacAge').value = data.wifeQlacAge ?? 74;
+        document.getElementById('husbandConversionPct').value = data.husbandConversionPct ?? 75;
+        document.getElementById('wifeConversionPct').value = data.wifeConversionPct ?? 25;
+        document.getElementById('ordinaryIncome').value = data.ordinaryIncome ?? 120000;
+        document.getElementById('husbandSsi').value = data.husbandSsi ?? 0;
+        document.getElementById('wifeSsi').value = data.wifeSsi ?? 0;
+        document.getElementById('husbandSsiStartAge').value = data.husbandSsiStartAge ?? 70;
+        document.getElementById('wifeSsiStartAge').value = data.wifeSsiStartAge ?? 70;
         document.getElementById('growthRate').value = data.growthRate ?? 6.0;
-        document.getElementById('targetTaxBracket').value = data.targetTaxBracket ?? 22;
+        document.getElementById('currentTaxBracket').value = data.currentTaxBracket ?? (data.targetTaxBracket ?? 22);
+        document.getElementById('yearsUntilSwitch').value = data.yearsUntilSwitch ?? 3;
+        document.getElementById('futureTaxBracket').value = data.futureTaxBracket ?? 24;
         document.getElementById('targetPctCeiling').value = data.targetPctCeiling ?? 91;
       }
     });
 
-    // Save inputs to localStorage and navigate to results page
     document.getElementById('scenario-form').addEventListener('submit', (e) => {
       e.preventDefault();
 
@@ -275,18 +389,27 @@
         wifeAge: parseFloat(document.getElementById('wifeAge').value),
         husbandIra: parseFloat(document.getElementById('husbandIra').value),
         wifeIra: parseFloat(document.getElementById('wifeIra').value),
-        husbandConversionPct: parseFloat(document.getElementById('husbandConversionPct').value),
-        wifeConversionPct: parseFloat(document.getElementById('wifeConversionPct').value),
         husbandRoth: parseFloat(document.getElementById('husbandRoth').value),
         wifeRoth: parseFloat(document.getElementById('wifeRoth').value),
+        husbandQlac: parseFloat(document.getElementById('husbandQlac').value),
+        husbandQlacAge: parseFloat(document.getElementById('husbandQlacAge').value),
+        wifeQlac: parseFloat(document.getElementById('wifeQlac').value),
+        wifeQlacAge: parseFloat(document.getElementById('wifeQlacAge').value),
+        husbandConversionPct: parseFloat(document.getElementById('husbandConversionPct').value),
+        wifeConversionPct: parseFloat(document.getElementById('wifeConversionPct').value),
+        ordinaryIncome: parseFloat(document.getElementById('ordinaryIncome').value),
+        husbandSsi: parseFloat(document.getElementById('husbandSsi').value),
+        wifeSsi: parseFloat(document.getElementById('wifeSsi').value),
+        husbandSsiStartAge: parseFloat(document.getElementById('husbandSsiStartAge').value),
+        wifeSsiStartAge: parseFloat(document.getElementById('wifeSsiStartAge').value),
         growthRate: parseFloat(document.getElementById('growthRate').value),
-        targetTaxBracket: parseFloat(document.getElementById('targetTaxBracket').value),
+        currentTaxBracket: parseFloat(document.getElementById('currentTaxBracket').value),
+        yearsUntilSwitch: parseFloat(document.getElementById('yearsUntilSwitch').value),
+        futureTaxBracket: parseFloat(document.getElementById('futureTaxBracket').value),
         targetPctCeiling: parseFloat(document.getElementById('targetPctCeiling').value)
       };
 
       localStorage.setItem('rothQlacInputs', JSON.stringify(inputs));
-      
-      // Redirect to Page 2 (results.html)
       window.location.href = 'results.html';
     });
   </script>

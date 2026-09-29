@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Roth QLAC Scenario - Step 3: Summary & Visuals</title>
+  <title>Roth Scenario - Step 3: Summary & Visuals</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -40,6 +40,23 @@
       margin-bottom: 24px;
     }
 
+    .header-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      text-decoration: none;
+      font-size: 1.5rem;
+      color: #475569;
+      transition: color 0.2s;
+    }
+
+    .icon-btn:hover {
+      color: var(--primary);
+    }
+
     h1 {
       font-size: 1.6rem;
       color: var(--primary);
@@ -47,7 +64,8 @@
 
     .nav-buttons {
       display: flex;
-      gap: 12px;
+      gap: 10px;
+      align-items: center;
     }
 
     .btn {
@@ -59,18 +77,27 @@
       font-size: 0.9rem;
       font-weight: 600;
       transition: background 0.2s;
+      border: none;
+      cursor: pointer;
     }
 
     .btn:hover {
       background-color: #475569;
     }
 
-    /* Metric Grid */
+    .btn-export {
+      background-color: #059669;
+    }
+
+    .btn-export:hover {
+      background-color: #047857;
+    }
+
     .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 16px;
-      margin-bottom: 32px;
+      margin-bottom: 24px;
     }
 
     .metric-card {
@@ -82,20 +109,49 @@
     }
 
     .metric-card .title {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: #64748b;
       font-weight: 600;
       text-transform: uppercase;
     }
 
     .metric-card .value {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: 700;
       color: var(--primary);
       margin-top: 6px;
     }
 
-    /* Chart Containers */
+    .metric-card.tax-card .value {
+      color: #b91c1c;
+    }
+
+    .insight-card {
+      background: #eff6ff;
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 6px;
+      margin-bottom: 24px;
+      border-top: 1px solid #dbeafe;
+      border-right: 1px solid #dbeafe;
+      border-bottom: 1px solid #dbeafe;
+    }
+
+    .insight-card h3 {
+      font-size: 1rem;
+      color: var(--primary);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .insight-card p {
+      font-size: 0.95rem;
+      color: #1e293b;
+      line-height: 1.5;
+    }
+
     .chart-container {
       background: var(--card-bg);
       padding: 24px;
@@ -116,8 +172,12 @@
 
   <div class="container">
     <div class="header-bar">
-      <h1>Scenario Summary & Insights</h1>
+      <div class="header-title-group">
+        <a href="settings.html" class="icon-btn" title="System Settings">⚙</a>
+        <h1>Scenario Summary & Insights</h1>
+      </div>
       <div class="nav-buttons">
+        <button id="btnExport" class="btn btn-export">📥 Export Scenario</button>
         <a href="results.html" class="btn">← Back to Table</a>
         <a href="index.html" class="btn">Edit Inputs</a>
       </div>
@@ -126,31 +186,41 @@
     <!-- Summary Metrics -->
     <div class="metrics-grid">
       <div class="metric-card">
-        <div class="title">Initial Portfolio Value</div>
+        <div class="title">Initial Portfolio</div>
         <div class="value" id="metricInitial">--</div>
       </div>
       <div class="metric-card">
         <div class="title">Total 25-Yr Conversions</div>
         <div class="value" id="metricConversions">--</div>
       </div>
-      <div class="metric-card">
-        <div class="title">Total Lifetime RMDs</div>
-        <div class="value" id="metricRmds">--</div>
+      <div class="metric-card tax-card">
+        <div class="title">Total 25-Yr Est. Tax Paid</div>
+        <div class="value" id="metricTotalTax">--</div>
       </div>
       <div class="metric-card">
-        <div class="title">Projected IRA (Year 25)</div>
+        <div class="title">Projected Traditional IRA</div>
         <div class="value" id="metricFinalIra">--</div>
       </div>
+      <div class="metric-card">
+        <div class="title">Projected Roth Balance</div>
+        <div class="value" id="metricFinalRoth">--</div>
+      </div>
+    </div>
+
+    <!-- Insights Statement Box -->
+    <div class="insight-card">
+      <h3>💡 Key Tax Bracket Crossover Insight</h3>
+      <p id="insightStatement">Analyzing scenario data...</p>
     </div>
 
     <!-- Charts -->
     <div class="chart-container">
-      <h2>Projected Traditional IRA Balance Trajectory</h2>
-      <canvas id="iraChart" height="100"></canvas>
+      <h2>Projected Traditional IRA Balance vs. Roth Balance</h2>
+      <canvas id="balanceChart" height="100"></canvas>
     </div>
 
     <div class="chart-container">
-      <h2>Annual Conversion & RMD Breakdown</h2>
+      <h2>Annual Income Breakdown (Combined Income)</h2>
       <canvas id="incomeChart" height="100"></canvas>
     </div>
   </div>
@@ -164,12 +234,19 @@
       95: 8.9,  96: 8.4,  97: 7.8,  98: 7.3,  99: 6.8, 100: 6.4
     };
 
-    const taxBrackets = [
-      211400, 216685, 222102, 227655, 233346, 239180, 245159, 251288,
-      257570, 264010, 270610, 277375, 284309, 291417, 298702, 306170
+    const baseBracketsMFJ = [
+      { rate: 0.10, upper: 23200 },
+      { rate: 0.12, upper: 94300 },
+      { rate: 0.22, upper: 201050 },
+      { rate: 0.24, upper: 383900 },
+      { rate: 0.32, upper: 487450 },
+      { rate: 0.35, upper: 731200 },
+      { rate: 0.37, upper: Infinity }
     ];
 
     const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+    let currentExportPayload = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       const savedData = localStorage.getItem('rothQlacInputs');
@@ -181,87 +258,252 @@
 
       const inputs = JSON.parse(savedData);
       renderSummary(inputs);
+
+      document.getElementById('btnExport').addEventListener('click', () => {
+        if (!currentExportPayload) return;
+        const jsonStr = JSON.stringify(currentExportPayload, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const curBracket = inputs.currentTaxBracket ?? 22;
+        const futBracket = inputs.futureTaxBracket ?? 24;
+        a.href = url;
+        a.download = `Roth_Scenario_${curBracket}pct_to_${futBracket}pct.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
     });
 
+    function getProjectedBracketArray(targetBracket, settings) {
+      const inflation = settings?.inflationRate ?? 2.5;
+      const baseDefaults = { 22: 211400, 24: 403550, 32: 512480, 35: 768700 };
+      const baseVal = settings?.federalBrackets?.[targetBracket] ?? (baseDefaults[targetBracket] || 211400);
+
+      if (settings?.projectedFederalTable?.[targetBracket]) {
+        return settings.projectedFederalTable[targetBracket];
+      }
+
+      const projArray = [];
+      for (let i = 0; i < 25; i++) {
+        projArray.push(Math.round(baseVal * Math.pow(1 + (inflation / 100), i)));
+      }
+      return projArray;
+    }
+
+    function calculateEstimatedFederalTax(combinedIncome, yearIndex, hAge, wAge, inflation) {
+      const infFactor = Math.pow(1 + (inflation / 100), yearIndex);
+      let stdDeduction = 29200 * infFactor;
+      if (hAge >= 65) stdDeduction += 1550 * infFactor;
+      if (wAge >= 65) stdDeduction += 1550 * infFactor;
+
+      const taxableIncome = Math.max(0, combinedIncome - stdDeduction);
+      let tax = 0;
+      let previousUpper = 0;
+
+      for (const b of baseBracketsMFJ) {
+        const currentUpper = b.upper === Infinity ? Infinity : b.upper * infFactor;
+        if (taxableIncome > previousUpper) {
+          const taxableChunk = Math.min(taxableIncome - previousUpper, currentUpper - previousUpper);
+          tax += taxableChunk * b.rate;
+          previousUpper = currentUpper;
+        } else {
+          break;
+        }
+      }
+
+      return tax;
+    }
+
     function renderSummary(inputs) {
+      const settings = JSON.parse(localStorage.getItem('rothSystemSettings') || '{}');
+      const inflation = settings?.inflationRate ?? 2.5;
+
+      const curBracket = inputs.currentTaxBracket ?? (inputs.targetTaxBracket ?? 22);
+      const switchYears = inputs.yearsUntilSwitch ?? 3;
+      const futBracket = inputs.futureTaxBracket ?? 24;
+
+      const currentBracketArray = getProjectedBracketArray(curBracket, settings);
+      const futureBracketArray = getProjectedBracketArray(futBracket, settings);
+
       const currentYear = new Date().getFullYear();
-      const years = [];
-      const combinedBalances = [];
+      const xLabels = [];
+      const combinedIraBalances = [];
+      const combinedRothBalances = [];
+      
+      const totalIncomeList = [];
       const conversionTotals = [];
+      const distributionTotals = [];
       const rmdTotals = [];
 
       let husbandIra = inputs.husbandIra;
       let wifeIra = inputs.wifeIra;
-      let qlacDeducted = false;
+      let husbandRoth = inputs.husbandRoth;
+      let wifeRoth = inputs.wifeRoth;
 
       let totalConversions = 0;
-      let totalRmds = 0;
+      let totalTaxPaid = 0;
       const initialTotal = inputs.husbandIra + inputs.wifeIra + inputs.husbandRoth + inputs.wifeRoth;
+      const growthFactor = 1 + (inputs.growthRate / 100);
+      const pFraction = inputs.targetPctCeiling / 100;
 
-      for (let i = 0; i < 25; i++) {
-        const yr = currentYear + i;
-        const hAge = inputs.husbandAge + i;
-        const wAge = inputs.wifeAge + i;
+      let crossoverInfo = null;
 
-        if (!qlacDeducted) {
-          husbandIra = Math.max(0, husbandIra - 210000);
-          qlacDeducted = true;
-        }
+		for (let i = 0; i < 25; i++) {
+		  const yr = currentYear + i;
+		  const hAge = inputs.husbandAge + i;
+		  const wAge = inputs.wifeAge + i;
 
-        const bracketCeiling = taxBrackets[i] || taxBrackets[taxBrackets.length - 1] * Math.pow(1.025, i - taxBrackets.length + 1);
-        const maxConvCap = bracketCeiling * (inputs.targetPctCeiling / 100);
+		  xLabels.push(`${yr} (H:${hAge}/W:${wAge})`);
 
-        let hRmd = (hAge >= 75 && irsTable[hAge]) ? husbandIra / irsTable[hAge] : 0;
-        let wRmd = (wAge >= 75 && irsTable[wAge]) ? wifeIra / irsTable[wAge] : 0;
-        const combRmd = hRmd + wRmd;
+		  const activeBracketPct = (i < switchYears) ? curBracket : futBracket;
+		  const activeBracketArray = (i < switchYears) ? currentBracketArray : futureBracketArray;
+		  const bracketCeiling = activeBracketArray[i];
 
-        const growthFactor = 1 + (inputs.growthRate / 100);
-        husbandIra = Math.max(0, (husbandIra - (maxConvCap * inputs.husbandConversionPct / 100) - hRmd) * growthFactor);
-        wifeIra = Math.max(0, (wifeIra - (maxConvCap * inputs.wifeConversionPct / 100) - wRmd) * growthFactor);
+		  // QLAC Deductions
+		  const husbandQlacDeduction = (hAge === inputs.husbandQlacAge) ? inputs.husbandQlac : 0;
+		  const wifeQlacDeduction = (wAge === inputs.wifeQlacAge) ? inputs.wifeQlac : 0;
 
-        years.push(yr);
-        combinedBalances.push(husbandIra + wifeIra);
-        conversionTotals.push(maxConvCap);
-        rmdTotals.push(combRmd);
+		  // Total Income
+		  const husbandSsiActive = (hAge >= inputs.husbandSsiStartAge) ? inputs.husbandSsi : 0;
+		  const wifeSsiActive = (wAge >= inputs.wifeSsiStartAge) ? inputs.wifeSsi : 0;
+		  const totalIncome = inputs.ordinaryIncome + husbandSsiActive + wifeSsiActive;
 
-        totalConversions += maxConvCap;
-        totalRmds += combRmd;
+		  // RMD Calculation
+		  const hRmd = (hAge >= 75 && irsTable[hAge]) ? husbandIra / irsTable[hAge] : 0;
+		  const wRmd = (wAge >= 75 && irsTable[wAge]) ? wifeIra / irsTable[wAge] : 0;
+		  const combRmd = hRmd + wRmd;
+
+		  // Conversions & Distributions
+		  const maxConvCap = bracketCeiling * pFraction;
+		  const annualRothConversion = Math.max(0, maxConvCap - totalIncome - combRmd);
+
+		  const husbandConv = annualRothConversion * (inputs.husbandConversionPct / 100);
+		  const wifeConv = annualRothConversion * (inputs.wifeConversionPct / 100);
+
+		  const iraDistribution = bracketCeiling * (1 - pFraction);
+
+		  // Combined Income & Est Tax Accumulation
+		  const combinedIncome = totalIncome + annualRothConversion + iraDistribution + combRmd;
+		  const estimatedTax = calculateEstimatedFederalTax(combinedIncome, i, hAge, wAge, inflation);
+		  totalTaxPaid += estimatedTax;
+
+		  // FIX: Use Math.round to eliminate floating-point precision issues
+		  if (!crossoverInfo && Math.round(combinedIncome) > Math.round(bracketCeiling)) {
+		    crossoverInfo = {
+		      year: yr,
+		      husbandAge: hAge,
+		      wifeAge: wAge,
+		      combinedIncome: combinedIncome,
+		      ceiling: bracketCeiling,
+		      activeBracketPct: activeBracketPct
+		    };
+		  }
+
+		  // Update Balances
+		  husbandIra = Math.max(0, (husbandIra - husbandQlacDeduction - husbandConv - hRmd - (iraDistribution * 0.5)) * growthFactor);
+		  wifeIra = Math.max(0, (wifeIra - wifeQlacDeduction - wifeConv - wRmd - (iraDistribution * 0.5)) * growthFactor);
+  
+		  husbandRoth = (husbandRoth + husbandConv) * growthFactor;
+		  wifeRoth = (wifeRoth + wifeConv) * growthFactor;
+
+		  combinedIraBalances.push(husbandIra + wifeIra);
+		  combinedRothBalances.push(husbandRoth + wifeRoth);
+
+		  totalIncomeList.push(totalIncome);
+		  conversionTotals.push(annualRothConversion);
+		  distributionTotals.push(iraDistribution);
+		  rmdTotals.push(combRmd);
+
+		  totalConversions += annualRothConversion;
+		}
+      // Format Insight Text Statement
+      let insightText = '';
+      if (crossoverInfo) {
+        insightText = `In year ${crossoverInfo.year} (Husband Age ${crossoverInfo.husbandAge} / Wife Age ${crossoverInfo.wifeAge}), your Combined Income of ${fmt.format(crossoverInfo.combinedIncome)} moves above your active target ${crossoverInfo.activeBracketPct}% tax bracket ceiling of ${fmt.format(crossoverInfo.ceiling)}.`;
+      } else {
+        insightText = `Throughout the entire 25-year projection horizon (switching from ${curBracket}% to ${futBracket}% in Year ${switchYears}), your Combined Income stays within your active tax bracket ceiling.`;
       }
 
-      // Update Cards
+      // Render Insight HTML Statement Box
+      const insightElem = document.getElementById('insightStatement');
+      if (crossoverInfo) {
+        insightElem.innerHTML = `In year <strong>${crossoverInfo.year}</strong> (Husband Age <strong>${crossoverInfo.husbandAge}</strong> / Wife Age <strong>${crossoverInfo.wifeAge}</strong>), your Combined Income of <strong>${fmt.format(crossoverInfo.combinedIncome)}</strong> moves above your active target ${crossoverInfo.activeBracketPct}% tax bracket ceiling of <strong>${fmt.format(crossoverInfo.ceiling)}</strong>.`;
+      } else {
+        insightElem.innerHTML = `Throughout the entire 25-year projection horizon (switching from <strong>${curBracket}%</strong> to <strong>${futBracket}%</strong> in Year ${switchYears}), your Combined Income stays within your active tax bracket ceiling.`;
+      }
+
+      // Prepare Export Data Payload including Insight Text
+      currentExportPayload = {
+        scenarioInputs: inputs,
+        systemSettings: settings,
+        summaryMetrics: {
+          initialPortfolio: initialTotal,
+          total25YearConversions: totalConversions,
+          total25YearEstTaxPaid: totalTaxPaid,
+          projectedFinalTraditionalIra: combinedIraBalances[combinedIraBalances.length - 1],
+          projectedFinalRothBalance: combinedRothBalances[combinedRothBalances.length - 1]
+        },
+        insightStatement: insightText
+      };
+
+      // Dashboard Metrics
       document.getElementById('metricInitial').textContent = fmt.format(initialTotal);
       document.getElementById('metricConversions').textContent = fmt.format(totalConversions);
-      document.getElementById('metricRmds').textContent = fmt.format(totalRmds);
-      document.getElementById('metricFinalIra').textContent = fmt.format(combinedBalances[combinedBalances.length - 1]);
+      document.getElementById('metricTotalTax').textContent = fmt.format(totalTaxPaid);
+      document.getElementById('metricFinalIra').textContent = fmt.format(combinedIraBalances[combinedIraBalances.length - 1]);
+      document.getElementById('metricFinalRoth').textContent = fmt.format(combinedRothBalances[combinedRothBalances.length - 1]);
 
-      // Render IRA Trajectory Chart
-      new Chart(document.getElementById('iraChart'), {
+      // Chart 1: Line Chart
+      new Chart(document.getElementById('balanceChart'), {
         type: 'line',
         data: {
-          labels: years,
-          datasets: [{
-            label: 'Combined Traditional IRA Balance ($)',
-            data: combinedBalances,
-            borderColor: '#1e3a8a',
-            backgroundColor: 'rgba(30, 58, 138, 0.1)',
-            fill: true,
-            tension: 0.3
-          }]
+          labels: xLabels,
+          datasets: [
+            {
+              label: 'Combined Traditional IRA Balance ($)',
+              data: combinedIraBalances,
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              fill: true,
+              tension: 0.3
+            },
+            {
+              label: 'Combined Roth Balance ($)',
+              data: combinedRothBalances,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              fill: true,
+              tension: 0.3
+            }
+          ]
         },
-        options: { responsive: true, plugins: { legend: { display: false } } }
+        options: {
+          responsive: true,
+          scales: {
+            x: { ticks: { maxRotation: 45, minRotation: 45 } }
+          }
+        }
       });
 
-      // Render Conversions vs RMD Chart
+      // Chart 2: Stacked Bar Chart
       new Chart(document.getElementById('incomeChart'), {
         type: 'bar',
         data: {
-          labels: years,
+          labels: xLabels,
           datasets: [
-            { label: 'Target Roth Conversion', data: conversionTotals, backgroundColor: '#3b82f6' },
-            { label: 'Combined RMDs', data: rmdTotals, backgroundColor: '#ef4444' }
+            { label: 'Total Income (Ordinary + SSI)', data: totalIncomeList, backgroundColor: '#3b82f6' },
+            { label: 'Annual Roth Conversion', data: conversionTotals, backgroundColor: '#10b981' },
+            { label: 'Annual IRA Distribution', data: distributionTotals, backgroundColor: '#f59e0b' },
+            { label: 'Combined RMD', data: rmdTotals, backgroundColor: '#ef4444' }
           ]
         },
-        options: { responsive: true, scales: { x: { stacked: true }, y: { stacked: true } } }
+        options: {
+          responsive: true,
+          scales: {
+            x: { stacked: true, ticks: { maxRotation: 45, minRotation: 45 } },
+            y: { stacked: true }
+          }
+        }
       });
     }
   </script>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Roth QLAC Scenario - Step 2: Income & Balance Projections</title>
+  <title>Roth Scenario - Step 2: Income & Projections</title>
   <style>
     :root {
       --primary: #1e3a8a;
@@ -13,6 +13,8 @@
       --text: #0f172a;
       --border: #cbd5e1;
       --header-bg: #f1f5f9;
+      --roth-header-bg: #ecfdf5;
+      --tax-header-bg: #fef2f2;
     }
 
     * {
@@ -29,7 +31,7 @@
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1450px;
       margin: 0 auto;
     }
 
@@ -40,12 +42,34 @@
       margin-bottom: 24px;
     }
 
+    .header-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      text-decoration: none;
+      font-size: 1.5rem;
+      color: #475569;
+      transition: color 0.2s;
+    }
+
+    .icon-btn:hover {
+      color: var(--primary);
+    }
+
     h1 {
       font-size: 1.6rem;
       color: var(--primary);
     }
 
-    .btn-back {
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
       background-color: #64748b;
       color: white;
       text-decoration: none;
@@ -56,11 +80,10 @@
       transition: background 0.2s;
     }
 
-    .btn-back:hover {
+    .btn:hover {
       background-color: #475569;
     }
 
-    /* Input Summary Cards */
     .summary-cards {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -89,7 +112,6 @@
       margin-top: 4px;
     }
 
-    /* Table Styling */
     .table-container {
       background: var(--card-bg);
       border-radius: 8px;
@@ -101,7 +123,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.875rem;
+      font-size: 0.85rem;
       text-align: right;
     }
 
@@ -119,6 +141,16 @@
       top: 0;
     }
 
+    th.roth-header {
+      background-color: var(--roth-header-bg);
+      color: #065f46;
+    }
+
+    th.tax-header {
+      background-color: var(--tax-header-bg);
+      color: #991b1b;
+    }
+
     th.text-left, td.text-left {
       text-align: left;
     }
@@ -127,18 +159,48 @@
       background-color: #f8fafc;
     }
 
-    .highlight-col {
+    .highlight-ira {
       background-color: #f1f5f9;
       font-weight: 600;
     }
+
+    .highlight-roth {
+      background-color: #f0fdf4;
+      font-weight: 600;
+    }
+
+    .highlight-tax {
+      background-color: #fef2f2;
+      font-weight: 700;
+      color: #991b1b;
+    }
+
+    .irmaa-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .tier-base { background-color: #f1f5f9; color: #475569; }
+    .tier-1 { background-color: #fef3c7; color: #92400e; }
+    .tier-2 { background-color: #ffedd5; color: #c2410c; }
+    .tier-3 { background-color: #fee2e2; color: #b91c1c; }
   </style>
 </head>
 <body>
 
   <div class="container">
     <div class="header-bar">
-      <h1>Retirement Income & Balance Projection</h1>
-      <a href="index.html" class="btn-back">← Edit Inputs</a>
+      <div class="header-title-group">
+        <a href="settings.html" class="icon-btn" title="System Settings">⚙</a>
+        <h1>Retirement Income & Projection Engine</h1>
+      </div>
+      <div class="nav-buttons">
+        <a href="index.html" class="btn">← Edit Inputs</a>
+        <a href="summary.html" class="btn">Summary & Charts →</a>
+      </div>
     </div>
 
     <!-- Summary Cards -->
@@ -148,16 +210,16 @@
         <div class="value" id="cardAges">-- / --</div>
       </div>
       <div class="card">
-        <div class="label">Starting IRA / 401(k)</div>
+        <div class="label">Starting IRA Total</div>
         <div class="value" id="cardIra">--</div>
       </div>
       <div class="card">
-        <div class="label">Starting Roth Balance</div>
-        <div class="value" id="cardRoth">--</div>
+        <div class="label">Ord. Income / SSI</div>
+        <div class="value" id="cardIncome">--</div>
       </div>
       <div class="card">
-        <div class="label">Growth Rate / Bracket</div>
-        <div class="value" id="cardGrowth">--</div>
+        <div class="label">Growth / Tax Strategy</div>
+        <div class="value" id="cardSettings">--</div>
       </div>
     </div>
 
@@ -169,27 +231,32 @@
             <th class="text-left">Year</th>
             <th>Husband Age</th>
             <th>Wife Age</th>
-            <th>Target Conv. Cap</th>
+            <th class="text-left">IRMAA Tier</th>
+            <th>Target Bracket</th>
+            <th>Bracket Ceiling</th>
+            <th>Max Conv. Cap</th>
+            <th>Combined RMD</th>
+            <th>Annual Roth Conv.</th>
             <th>Husband Conv.</th>
             <th>Wife Conv.</th>
-            <th>QLAC Income</th>
-            <th>Husband RMD</th>
-            <th>Wife RMD</th>
-            <th>Combined RMD</th>
-            <th class="highlight-col">Husband Ending IRA</th>
-            <th class="highlight-col">Wife Ending IRA</th>
-            <th class="highlight-col">Combined Ending IRA</th>
+            <th>IRA Distribution</th>
+            <th class="highlight-ira">Husband Ending IRA</th>
+            <th class="highlight-ira">Wife Ending IRA</th>
+            <th class="highlight-ira">Combined Ending IRA</th>
+            <th class="roth-header highlight-roth">Husband Ending Roth</th>
+            <th class="roth-header highlight-roth">Wife Ending Roth</th>
+            <th class="roth-header highlight-roth">Combined Ending Roth</th>
+            <th class="tax-header highlight-tax">Est. Federal Tax</th>
           </tr>
         </thead>
         <tbody id="projectionTableBody">
-          <!-- Dynamically Generated via JS -->
+          <!-- JS Population -->
         </tbody>
       </table>
     </div>
   </div>
 
   <script>
-    // Uniform Lifetime Table IRS Factors (Ages 75 - 100)
     const irsTable = {
       75: 24.6, 76: 23.7, 77: 22.9, 78: 22.0, 79: 21.1,
       80: 20.2, 81: 19.4, 82: 18.5, 83: 17.7, 84: 16.8,
@@ -198,11 +265,28 @@
       95: 8.9,  96: 8.4,  97: 7.8,  98: 7.3,  99: 6.8, 100: 6.4
     };
 
-    // Bracket ceiling schedule starting reference values
-    const taxBrackets = [
-      211400, 216685, 222102, 227655, 233346, 239180, 245159, 251288,
-      257570, 264010, 270610, 277375, 284309, 291417, 298702, 306170
+    const baseBracketsMFJ = [
+      { rate: 0.10, upper: 23200 },
+      { rate: 0.12, upper: 94300 },
+      { rate: 0.22, upper: 201050 },
+      { rate: 0.24, upper: 383900 },
+      { rate: 0.32, upper: 487450 },
+      { rate: 0.35, upper: 731200 },
+      { rate: 0.37, upper: Infinity }
     ];
+
+
+	// Dynamic IRMAA Array Builder from Settings
+	function getIrmaaBaseLimits(settings) {
+	  const limits = settings?.irmaaLimits || {};
+	  return [
+	    { name: 'Base ($0)', limit: limits.base ?? 211400, class: 'tier-base' },
+	    { name: 'Tier 1 ($95)', limit: limits.tier1 ?? 274000, class: 'tier-1' },
+	    { name: 'Tier 2 ($240)', limit: limits.tier2 ?? 342000, class: 'tier-2' },
+	    { name: 'Tier 3 ($385)', limit: limits.tier3 ?? 410000, class: 'tier-3' },
+	    { name: 'Tier 4+', limit: Infinity, class: 'tier-3' }
+	  ];
+	}
 
     const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 
@@ -216,83 +300,165 @@
 
       const inputs = JSON.parse(savedData);
 
-      // Render Summary Cards
+      const curBracket = inputs.currentTaxBracket ?? (inputs.targetTaxBracket ?? 22);
+      const switchYears = inputs.yearsUntilSwitch ?? 3;
+      const futBracket = inputs.futureTaxBracket ?? 24;
+
       document.getElementById('cardAges').textContent = `${inputs.husbandAge} / ${inputs.wifeAge}`;
       document.getElementById('cardIra').textContent = fmt.format(inputs.husbandIra + inputs.wifeIra);
-      document.getElementById('cardRoth').textContent = fmt.format(inputs.husbandRoth + inputs.wifeRoth);
-      document.getElementById('cardGrowth').textContent = `${inputs.growthRate}% / ${inputs.targetTaxBracket}%`;
+      document.getElementById('cardIncome').textContent = `${fmt.format(inputs.ordinaryIncome)} / ${fmt.format(inputs.husbandSsi + inputs.wifeSsi)}`;
+      document.getElementById('cardSettings').textContent = `${inputs.growthRate}% | ${curBracket}% → ${futBracket}% (Yr ${switchYears})`;
 
-      // Run Projection Engine
       runProjection(inputs);
     });
+
+    function getProjectedBracketArray(targetBracket, settings) {
+      const inflation = settings?.inflationRate ?? 2.5;
+      const baseDefaults = { 22: 211400, 24: 403550, 32: 512480, 35: 768700 };
+      const baseVal = settings?.federalBrackets?.[targetBracket] ?? (baseDefaults[targetBracket] || 211400);
+
+      if (settings?.projectedFederalTable?.[targetBracket]) {
+        return settings.projectedFederalTable[targetBracket];
+      }
+
+      const projArray = [];
+      for (let i = 0; i < 25; i++) {
+        projArray.push(Math.round(baseVal * Math.pow(1 + (inflation / 100), i)));
+      }
+      return projArray;
+    }
+
+
+	function evaluateIrmaaTier(combinedIncome, yearIndex, inflation, settings) {
+	  const infFactor = Math.pow(1 + (inflation / 100), yearIndex);
+	  const irmaaTable = getIrmaaBaseLimits(settings);
+
+	  for (const tier of irmaaTable) {
+	    const adjustedLimit = tier.limit === Infinity ? Infinity : tier.limit * infFactor;
+	    if (Math.round(combinedIncome) < adjustedLimit) {
+	      return `<span class="irmaa-badge ${tier.class}">${tier.name}</span>`;
+	    }
+	  }
+
+	  return `<span class="irmaa-badge tier-3">Tier 4+</span>`;
+	}
+
+    function calculateEstimatedFederalTax(combinedIncome, yearIndex, hAge, wAge, inflation) {
+      const infFactor = Math.pow(1 + (inflation / 100), yearIndex);
+      
+      let stdDeduction = 29200 * infFactor;
+      if (hAge >= 65) stdDeduction += 1550 * infFactor;
+      if (wAge >= 65) stdDeduction += 1550 * infFactor;
+
+      const taxableIncome = Math.max(0, combinedIncome - stdDeduction);
+      let tax = 0;
+      let previousUpper = 0;
+
+      for (const b of baseBracketsMFJ) {
+        const currentUpper = b.upper === Infinity ? Infinity : b.upper * infFactor;
+        if (taxableIncome > previousUpper) {
+          const taxableChunk = Math.min(taxableIncome - previousUpper, currentUpper - previousUpper);
+          tax += taxableChunk * b.rate;
+          previousUpper = currentUpper;
+        } else {
+          break;
+        }
+      }
+
+      return tax;
+    }
 
     function runProjection(inputs) {
       const tableBody = document.getElementById('projectionTableBody');
       tableBody.innerHTML = '';
 
+      const settings = JSON.parse(localStorage.getItem('rothSystemSettings') || '{}');
+      const inflation = settings?.inflationRate ?? 2.5;
+
+      const curBracket = inputs.currentTaxBracket ?? (inputs.targetTaxBracket ?? 22);
+      const switchYears = inputs.yearsUntilSwitch ?? 3;
+      const futBracket = inputs.futureTaxBracket ?? 24;
+
+      const currentBracketArray = getProjectedBracketArray(curBracket, settings);
+      const futureBracketArray = getProjectedBracketArray(futBracket, settings);
+
       let husbandIra = inputs.husbandIra;
       let wifeIra = inputs.wifeIra;
-      const qlacPurchase = 210000;
-      let qlacDeducted = false;
+      let husbandRoth = inputs.husbandRoth;
+      let wifeRoth = inputs.wifeRoth;
 
       const currentYear = new Date().getFullYear();
+      const pFraction = inputs.targetPctCeiling / 100;
+      const growthFactor = 1 + (inputs.growthRate / 100);
 
       for (let i = 0; i < 25; i++) {
         const year = currentYear + i;
         const hAge = inputs.husbandAge + i;
         const wAge = inputs.wifeAge + i;
 
-        // Apply QLAC purchase deduction on year 1
-        if (!qlacDeducted) {
-          husbandIra = Math.max(0, husbandIra - qlacPurchase);
-          qlacDeducted = true;
-        }
+        const activeBracketPct = (i < switchYears) ? curBracket : futBracket;
+        const activeBracketArray = (i < switchYears) ? currentBracketArray : futureBracketArray;
+        const bracketCeiling = activeBracketArray[i];
 
-        // Bracket Ceiling Calculation
-        const bracketCeiling = taxBrackets[i] || taxBrackets[taxBrackets.length - 1] * Math.pow(1.025, i - taxBrackets.length + 1);
-        const maxConvCap = bracketCeiling * (inputs.targetPctCeiling / 100);
+        // QLAC Deductions
+        const husbandQlacDeduction = (hAge === inputs.husbandQlacAge) ? inputs.husbandQlac : 0;
+        const wifeQlacDeduction = (wAge === inputs.wifeQlacAge) ? inputs.wifeQlac : 0;
 
-        const husbandConv = maxConvCap * (inputs.husbandConversionPct / 100);
-        const wifeConv = maxConvCap * (inputs.wifeConversionPct / 100);
+        // Total Income
+        const husbandSsiActive = (hAge >= inputs.husbandSsiStartAge) ? inputs.husbandSsi : 0;
+        const wifeSsiActive = (wAge >= inputs.wifeSsiStartAge) ? inputs.wifeSsi : 0;
+        const totalIncome = inputs.ordinaryIncome + husbandSsiActive + wifeSsiActive;
 
-        // QLAC Income starting at Husband Age 74
-        const qlacIncome = (hAge >= 74) ? 28200 : 0;
+        // RMD Calculation
+        const hRmd = (hAge >= 75 && irsTable[hAge]) ? husbandIra / irsTable[hAge] : 0;
+        const wRmd = (wAge >= 75 && irsTable[wAge]) ? wifeIra / irsTable[wAge] : 0;
+        const combinedRmd = hRmd + wRmd;
 
-        // RMD Calculations (RMD age threshold = 75)
-        let husbandRmd = 0;
-        if (hAge >= 75 && irsTable[hAge]) {
-          husbandRmd = husbandIra / irsTable[hAge];
-        }
+        // Conversions & Distributions
+        const maxConvCap = bracketCeiling * pFraction;
+        const annualRothConversion = Math.max(0, maxConvCap - totalIncome - combinedRmd);
 
-        let wifeRmd = 0;
-        if (wAge >= 75 && irsTable[wAge]) {
-          wifeRmd = wifeIra / irsTable[wAge];
-        }
+        const husbandConv = annualRothConversion * (inputs.husbandConversionPct / 100);
+        const wifeConv = annualRothConversion * (inputs.wifeConversionPct / 100);
+        const iraDistribution = bracketCeiling * (1 - pFraction);
 
-        const combinedRmd = husbandRmd + wifeRmd;
+        // Combined Income, IRMAA Tier, & Est Federal Tax
+        const combinedIncome = totalIncome + annualRothConversion + iraDistribution + combinedRmd;
+	    const irmaaTierHtml = evaluateIrmaaTier(combinedIncome, i, inflation, settings);
+        const estimatedTax = calculateEstimatedFederalTax(combinedIncome, i, hAge, wAge, inflation);
 
-        // Balance Growth Calculations
-        const growthFactor = 1 + (inputs.growthRate / 100);
-        husbandIra = Math.max(0, (husbandIra - husbandConv - husbandRmd) * growthFactor);
-        wifeIra = Math.max(0, (wifeIra - wifeConv - wifeRmd) * growthFactor);
+        // Traditional IRA Ending Balances
+        husbandIra = Math.max(0, (husbandIra - husbandQlacDeduction - husbandConv - hRmd - (iraDistribution * 0.5)) * growthFactor);
+        wifeIra = Math.max(0, (wifeIra - wifeQlacDeduction - wifeConv - wRmd - (iraDistribution * 0.5)) * growthFactor);
         const combinedIra = husbandIra + wifeIra;
 
-        // Build Table Row
+        // Roth Ending Balances
+        husbandRoth = (husbandRoth + husbandConv) * growthFactor;
+        wifeRoth = (wifeRoth + wifeConv) * growthFactor;
+        const combinedRoth = husbandRoth + wifeRoth;
+
+        // Render Table Row
         const row = document.createElement('tr');
         row.innerHTML = `
           <td class="text-left">${year}</td>
           <td>${hAge}</td>
           <td>${wAge}</td>
+          <td class="text-left">${irmaaTierHtml}</td>
+          <td>${activeBracketPct}%</td>
+          <td>${fmt.format(bracketCeiling)}</td>
           <td>${fmt.format(maxConvCap)}</td>
+          <td>${fmt.format(combinedRmd)}</td>
+          <td>${fmt.format(annualRothConversion)}</td>
           <td>${fmt.format(husbandConv)}</td>
           <td>${fmt.format(wifeConv)}</td>
-          <td>${fmt.format(qlacIncome)}</td>
-          <td>${fmt.format(husbandRmd)}</td>
-          <td>${fmt.format(wifeRmd)}</td>
-          <td>${fmt.format(combinedRmd)}</td>
-          <td class="highlight-col">${fmt.format(husbandIra)}</td>
-          <td class="highlight-col">${fmt.format(wifeIra)}</td>
-          <td class="highlight-col">${fmt.format(combinedIra)}</td>
+          <td>${fmt.format(iraDistribution)}</td>
+          <td class="highlight-ira">${fmt.format(husbandIra)}</td>
+          <td class="highlight-ira">${fmt.format(wifeIra)}</td>
+          <td class="highlight-ira">${fmt.format(combinedIra)}</td>
+          <td class="highlight-roth">${fmt.format(husbandRoth)}</td>
+          <td class="highlight-roth">${fmt.format(wifeRoth)}</td>
+          <td class="highlight-roth">${fmt.format(combinedRoth)}</td>
+          <td class="highlight-tax">${fmt.format(estimatedTax)}</td>
         `;
         tableBody.appendChild(row);
       }
