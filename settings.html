@@ -186,12 +186,21 @@
       <div class="section-title">Base Federal Tax Bracket Ceilings (MFJ)</div>
       <div class="grid-2">
         <div class="form-group">
+          <label for="bracket12">12% Bracket Limit</label>
+          <div class="input-wrapper">
+            <span class="prefix">$</span>
+            <input type="number" id="bracket12" class="has-prefix" required min="0" step="10" value="100800">
+          </div>
+        </div>
+        <div class="form-group">
           <label for="bracket22">22% Bracket Limit</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
             <input type="number" id="bracket22" class="has-prefix" required min="0" step="10" value="211400">
           </div>
         </div>
+      </div>
+      <div class="grid-2">
         <div class="form-group">
           <label for="bracket24">24% Bracket Limit</label>
           <div class="input-wrapper">
@@ -199,8 +208,6 @@
             <input type="number" id="bracket24" class="has-prefix" required min="0" step="10" value="403550">
           </div>
         </div>
-      </div>
-      <div class="grid-2">
         <div class="form-group">
           <label for="bracket32">32% Bracket Limit</label>
           <div class="input-wrapper">
@@ -208,6 +215,8 @@
             <input type="number" id="bracket32" class="has-prefix" required min="0" step="10" value="512480">
           </div>
         </div>
+      </div>
+      <div class="grid-2">
         <div class="form-group">
           <label for="bracket35">35% Bracket Limit</label>
           <div class="input-wrapper">
@@ -252,6 +261,23 @@
         </div>
       </div>
 
+      <!-- RMD Start Age -->
+      <div class="section-title">RMD Start Age</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="RMDHAge">Husband RMD start age</label>
+          <div class="input-wrapper">
+            <input type="number" id="RMDHAge" required min="50" max="100" step="1" value="75">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="RMDWAge">Wife RMD start age</label>
+          <div class="input-wrapper">
+            <input type="number" id="RMDWAge" required min="50" max="100" step="1" value="75">
+          </div>
+        </div>
+      </div>
+	  
       <button type="submit" class="btn-submit">Save Settings & Continue</button>
       <a href="index.html" class="btn-secondary">Cancel / Back to Inputs</a>
     </form>
@@ -265,6 +291,7 @@
         document.getElementById('inflationRate').value = s.inflationRate ?? 2.5;
         
         if (s.federalBrackets) {
+          document.getElementById('bracket12').value = s.federalBrackets[12] ?? 100800;
           document.getElementById('bracket22').value = s.federalBrackets[22] ?? 211400;
           document.getElementById('bracket24').value = s.federalBrackets[24] ?? 403550;
           document.getElementById('bracket32').value = s.federalBrackets[32] ?? 512480;
@@ -277,6 +304,11 @@
           document.getElementById('irmaaTier2').value = s.irmaaLimits.tier2 ?? 342000;
           document.getElementById('irmaaTier3').value = s.irmaaLimits.tier3 ?? 410000;
         }
+
+        if (s.rmdAges) {
+          document.getElementById('RMDHAge').value = s.rmdAges.husband ?? 75;
+          document.getElementById('RMDWAge').value = s.rmdAges.wife ?? 75;
+        }
       }
     });
 
@@ -286,6 +318,7 @@
       const settings = {
         inflationRate: parseFloat(document.getElementById('inflationRate').value),
         federalBrackets: {
+          12: parseFloat(document.getElementById('bracket12').value),
           22: parseFloat(document.getElementById('bracket22').value),
           24: parseFloat(document.getElementById('bracket24').value),
           32: parseFloat(document.getElementById('bracket32').value),
@@ -296,6 +329,10 @@
           tier1: parseFloat(document.getElementById('irmaaTier1').value),
           tier2: parseFloat(document.getElementById('irmaaTier2').value),
           tier3: parseFloat(document.getElementById('irmaaTier3').value)
+        },
+        rmdAges: {
+          husband: parseInt(document.getElementById('RMDHAge').value, 10),
+          wife: parseInt(document.getElementById('RMDWAge').value, 10)
         }
       };
 
