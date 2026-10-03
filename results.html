@@ -416,40 +416,50 @@
         const wRmd = (wAge >= rmdWAge && irsTable[wAge]) ? wifeIra / irsTable[wAge] : 0;
         const combinedRmd = hRmd + wRmd;
 
-		// --- Conversions & Distributions (Updated Waterfall Logic) ---
-		const maxConvCap = bracketCeiling * pFraction;
-		const desiredTotalConv = Math.max(0, maxConvCap - totalIncome - combinedRmd);
-		const iraDistribution = bracketCeiling * (1 - pFraction);
+        // --- Conversions & Distributions (Updated for IRA Distribution Cap & Waterfall) ---
 
-		// Calculate available IRA balance prior to conversion for this year
-		// (Accounting for QLAC and RMDs already scheduled for this year)
-		const husbandAvailIra = Math.max(0, husbandIra - husbandQlacDeduction - hRmd - (iraDistribution * 0.5));
-		const wifeAvailIra = Math.max(0, wifeIra - wifeQlacDeduction - wRmd - (iraDistribution * 0.5));
+        // 1. Calculate base remaining IRA balances prior to distributions and conversions
+        const husbandBaseAvailIra = Math.max(0, husbandIra - husbandQlacDeduction - hRmd);
+        const wifeBaseAvailIra = Math.max(0, wifeIra - wifeQlacDeduction - wRmd);
+        const totalBaseAvailIra = husbandBaseAvailIra + wifeBaseAvailIra;
 
-		// Step 1: Calculate initial targeted shares based on input percentages
-		let targetHusbandConv = desiredTotalConv * (inputs.husbandConversionPct / 100);
-		let targetWifeConv = desiredTotalConv * (inputs.wifeConversionPct / 100);
+        // 2. Calculate targeted IRA Distribution and CAP it at total available IRA balance
+        const targetIraDist = bracketCeiling * (1 - pFraction);
+        const iraDistribution = Math.min(targetIraDist, totalBaseAvailIra);
 
-		// Step 2: Cap conversions at actual available IRA balances
-		let husbandConv = Math.min(targetHusbandConv, husbandAvailIra);
-		let wifeConv = Math.min(targetWifeConv, wifeAvailIra);
+        // 3. Deduct actual IRA Distribution (split between spouses up to their available balance)
+        const husbandDistPortion = Math.min(iraDistribution * 0.5, husbandBaseAvailIra);
+        const wifeDistPortion = Math.min(iraDistribution - husbandDistPortion, wifeBaseAvailIra);
 
-		// Step 3: Shift leftover/unmet conversion capacity to the other spouse (Waterfall)
-		const unusedHusbandCap = targetHusbandConv - husbandConv;
-		const unusedWifeCap = targetWifeConv - wifeConv;
+        const husbandAvailIra = Math.max(0, husbandBaseAvailIra - husbandDistPortion);
+        const wifeAvailIra = Math.max(0, wifeBaseAvailIra - wifeDistPortion);
 
-		if (unusedHusbandCap > 0 && wifeAvailIra > wifeConv) {
-		  // Shift husband's unused conversion capacity to wife
-		  const additionalWifeConv = Math.min(unusedHusbandCap, wifeAvailIra - wifeConv);
-		  wifeConv += additionalWifeConv;
-		} else if (unusedWifeCap > 0 && husbandAvailIra > husbandConv) {
-		  // Shift wife's unused conversion capacity to husband
-		  const additionalHusbandConv = Math.min(unusedWifeCap, husbandAvailIra - husbandConv);
-		  husbandConv += additionalHusbandConv;
-		}
+        // 4. Calculate desired Total Roth Conversion
+        const maxConvCap = bracketCeiling * pFraction;
+        const desiredTotalConv = Math.max(0, maxConvCap - totalIncome - combinedRmd);
 
-		// Total Actual Conversion performed this year across both spouses
-		const annualRothConversion = husbandConv + wifeConv;
+        // Step 1: Calculate initial targeted shares based on input percentages
+        let targetHusbandConv = desiredTotalConv * (inputs.husbandConversionPct / 100);
+        let targetWifeConv = desiredTotalConv * (inputs.wifeConversionPct / 100);
+
+        // Step 2: Cap conversions at actual remaining available IRA balances
+        let husbandConv = Math.min(targetHusbandConv, husbandAvailIra);
+        let wifeConv = Math.min(targetWifeConv, wifeAvailIra);
+
+        // Step 3: Shift leftover/unmet conversion capacity to the other spouse (Waterfall)
+        const unusedHusbandCap = targetHusbandConv - husbandConv;
+        const unusedWifeCap = targetWifeConv - wifeConv;
+
+        if (unusedHusbandCap > 0 && wifeAvailIra > wifeConv) {
+          const additionalWifeConv = Math.min(unusedHusbandCap, wifeAvailIra - wifeConv);
+          wifeConv += additionalWifeConv;
+        } else if (unusedWifeCap > 0 && husbandAvailIra > husbandConv) {
+          const additionalHusbandConv = Math.min(unusedWifeCap, husbandAvailIra - husbandConv);
+          husbandConv += additionalHusbandConv;
+        }
+
+        // Total Actual Conversion performed this year across both spouses
+        const annualRothConversion = husbandConv + wifeConv;
 
         // Combined Income, IRMAA Tier, & Est Federal Tax
         const combinedIncome = totalIncome + annualRothConversion + iraDistribution + combinedRmd;
@@ -457,8 +467,8 @@
         const estimatedTax = calculateEstimatedFederalTax(combinedIncome, i, hAge, wAge, inflation);
 
         // Traditional IRA Ending Balances
-        husbandIra = Math.max(0, (husbandIra - husbandQlacDeduction - husbandConv - hRmd - (iraDistribution * 0.5)) * growthFactor);
-        wifeIra = Math.max(0, (wifeIra - wifeQlacDeduction - wifeConv - wRmd - (iraDistribution * 0.5)) * growthFactor);
+        husbandIra = Math.max(0, (husbandIra - husbandQlacDeduction - husbandConv - hRmd - husbandDistPortion) * growthFactor);
+        wifeIra = Math.max(0, (wifeIra - wifeQlacDeduction - wifeConv - wRmd - wifeDistPortion) * growthFactor);
         const combinedIra = husbandIra + wifeIra;
 
         // Roth Ending Balances
