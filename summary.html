@@ -227,7 +227,7 @@
 
   <script>
     const irsTable = {
-      75: 24.6, 76: 23.7, 77: 22.9, 78: 22.0, 79: 21.1,
+      73: 26.5, 75: 24.6, 76: 23.7, 77: 22.9, 78: 22.0, 79: 21.1,
       80: 20.2, 81: 19.4, 82: 18.5, 83: 17.7, 84: 16.8,
       85: 16.0, 86: 15.2, 87: 14.4, 88: 13.7, 89: 12.9,
       90: 12.2, 91: 11.5, 92: 10.8, 93: 10.1, 94: 9.5,
@@ -236,11 +236,11 @@
 
     const baseBracketsMFJ = [
       { rate: 0.10, upper: 23200 },
-      { rate: 0.12, upper: 94300 },
-      { rate: 0.22, upper: 201050 },
-      { rate: 0.24, upper: 383900 },
-      { rate: 0.32, upper: 487450 },
-      { rate: 0.35, upper: 731200 },
+      { rate: 0.12, upper: 100800 },
+      { rate: 0.22, upper: 211400 },
+      { rate: 0.24, upper: 403550 },
+      { rate: 0.32, upper: 512480 },
+      { rate: 0.35, upper: 768700 },
       { rate: 0.37, upper: Infinity }
     ];
 
@@ -276,7 +276,7 @@
 
     function getProjectedBracketArray(targetBracket, settings) {
       const inflation = settings?.inflationRate ?? 2.5;
-      const baseDefaults = { 22: 211400, 24: 403550, 32: 512480, 35: 768700 };
+      const baseDefaults = { 12: 100800, 22: 211400, 24: 403550, 32: 512480, 35: 768700 };
       const baseVal = settings?.federalBrackets?.[targetBracket] ?? (baseDefaults[targetBracket] || 211400);
 
       if (settings?.projectedFederalTable?.[targetBracket]) {
@@ -318,6 +318,9 @@
       const settings = JSON.parse(localStorage.getItem('rothSystemSettings') || '{}');
       const inflation = settings?.inflationRate ?? 2.5;
 
+      const rmdHAge = settings?.rmdAges?.husband ?? 75;
+      const rmdWAge = settings?.rmdAges?.wife ?? 75;
+
       const curBracket = inputs.currentTaxBracket ?? (inputs.targetTaxBracket ?? 22);
       const switchYears = inputs.yearsUntilSwitch ?? 3;
       const futBracket = inputs.futureTaxBracket ?? 24;
@@ -348,74 +351,102 @@
 
       let crossoverInfo = null;
 
-		for (let i = 0; i < 25; i++) {
-		  const yr = currentYear + i;
-		  const hAge = inputs.husbandAge + i;
-		  const wAge = inputs.wifeAge + i;
+      for (let i = 0; i < 25; i++) {
+        const yr = currentYear + i;
+        const hAge = inputs.husbandAge + i;
+        const wAge = inputs.wifeAge + i;
 
-		  xLabels.push(`${yr} (H:${hAge}/W:${wAge})`);
+        xLabels.push(`${yr} (H:${hAge}/W:${wAge})`);
 
-		  const activeBracketPct = (i < switchYears) ? curBracket : futBracket;
-		  const activeBracketArray = (i < switchYears) ? currentBracketArray : futureBracketArray;
-		  const bracketCeiling = activeBracketArray[i];
+        const activeBracketPct = (i < switchYears) ? curBracket : futBracket;
+        const activeBracketArray = (i < switchYears) ? currentBracketArray : futureBracketArray;
+        const bracketCeiling = activeBracketArray[i];
 
-		  // QLAC Deductions
-		  const husbandQlacDeduction = (hAge === inputs.husbandQlacAge) ? inputs.husbandQlac : 0;
-		  const wifeQlacDeduction = (wAge === inputs.wifeQlacAge) ? inputs.wifeQlac : 0;
+        // 1. QLAC Deductions
+        const husbandQlacDeduction = (hAge === inputs.husbandQlacAge) ? Math.min(inputs.husbandQlac, husbandIra) : 0;
+        const wifeQlacDeduction = (wAge === inputs.wifeQlacAge) ? Math.min(inputs.wifeQlac, wifeIra) : 0;
 
-		  // Total Income
-		  const husbandSsiActive = (hAge >= inputs.husbandSsiStartAge) ? inputs.husbandSsi : 0;
-		  const wifeSsiActive = (wAge >= inputs.wifeSsiStartAge) ? inputs.wifeSsi : 0;
-		  const totalIncome = inputs.ordinaryIncome + husbandSsiActive + wifeSsiActive;
+        // 2. Base Income
+        const husbandSsiActive = (hAge >= inputs.husbandSsiStartAge) ? inputs.husbandSsi : 0;
+        const wifeSsiActive = (wAge >= inputs.wifeSsiStartAge) ? inputs.wifeSsi : 0;
+        const totalIncome = inputs.ordinaryIncome + husbandSsiActive + wifeSsiActive;
 
-		  // RMD Calculation
-		  const hRmd = (hAge >= 75 && irsTable[hAge]) ? husbandIra / irsTable[hAge] : 0;
-		  const wRmd = (wAge >= 75 && irsTable[wAge]) ? wifeIra / irsTable[wAge] : 0;
-		  const combRmd = hRmd + wRmd;
+        // 3. RMD Calculation
+        const hRmd = (hAge >= rmdHAge && irsTable[hAge]) ? Math.min(husbandIra / irsTable[hAge], husbandIra - husbandQlacDeduction) : 0;
+        const wRmd = (wAge >= rmdWAge && irsTable[wAge]) ? Math.min(wifeIra / irsTable[wAge], wifeIra - wifeQlacDeduction) : 0;
+        const combRmd = hRmd + wRmd;
 
-		  // Conversions & Distributions
-		  const maxConvCap = bracketCeiling * pFraction;
-		  const annualRothConversion = Math.max(0, maxConvCap - totalIncome - combRmd);
+        // Remaining IRA balances after QLAC and RMD
+        let hIraAvail = Math.max(0, husbandIra - husbandQlacDeduction - hRmd);
+        let wIraAvail = Math.max(0, wifeIra - wifeQlacDeduction - wRmd);
 
-		  const husbandConv = annualRothConversion * (inputs.husbandConversionPct / 100);
-		  const wifeConv = annualRothConversion * (inputs.wifeConversionPct / 100);
+        // 4. IRA Distribution (Capped strictly at available balance)
+        const targetIraDist = bracketCeiling * (1 - pFraction);
+        const husbandDistPortion = Math.min(targetIraDist * 0.5, hIraAvail);
+        const wifeDistPortion = Math.min(targetIraDist * 0.5, wIraAvail);
+        const iraDistribution = husbandDistPortion + wifeDistPortion;
 
-		  const iraDistribution = bracketCeiling * (1 - pFraction);
+        // Deduct distribution from available balance before conversion
+        hIraAvail = Math.max(0, hIraAvail - husbandDistPortion);
+        wIraAvail = Math.max(0, wIraAvail - wifeDistPortion);
 
-		  // Combined Income & Est Tax Accumulation
-		  const combinedIncome = totalIncome + annualRothConversion + iraDistribution + combRmd;
-		  const estimatedTax = calculateEstimatedFederalTax(combinedIncome, i, hAge, wAge, inflation);
-		  totalTaxPaid += estimatedTax;
+        // 5. Annual Roth Conversions (Capped strictly at remaining available balance)
+        const maxConvCap = bracketCeiling * pFraction;
+        const desiredTotalConv = Math.max(0, maxConvCap - totalIncome - combRmd);
 
-		  // FIX: Use Math.round to eliminate floating-point precision issues
-		  if (!crossoverInfo && Math.round(combinedIncome) > Math.round(bracketCeiling)) {
-		    crossoverInfo = {
-		      year: yr,
-		      husbandAge: hAge,
-		      wifeAge: wAge,
-		      combinedIncome: combinedIncome,
-		      ceiling: bracketCeiling,
-		      activeBracketPct: activeBracketPct
-		    };
-		  }
+        let targetHusbandConv = desiredTotalConv * (inputs.husbandConversionPct / 100);
+        let targetWifeConv = desiredTotalConv * (inputs.wifeConversionPct / 100);
 
-		  // Update Balances
-		  husbandIra = Math.max(0, (husbandIra - husbandQlacDeduction - husbandConv - hRmd - (iraDistribution * 0.5)) * growthFactor);
-		  wifeIra = Math.max(0, (wifeIra - wifeQlacDeduction - wifeConv - wRmd - (iraDistribution * 0.5)) * growthFactor);
-  
-		  husbandRoth = (husbandRoth + husbandConv) * growthFactor;
-		  wifeRoth = (wifeRoth + wifeConv) * growthFactor;
+        let husbandConv = Math.min(targetHusbandConv, hIraAvail);
+        let wifeConv = Math.min(targetWifeConv, wIraAvail);
 
-		  combinedIraBalances.push(husbandIra + wifeIra);
-		  combinedRothBalances.push(husbandRoth + wifeRoth);
+        // Waterfall reallocation between spouses
+        const unusedHusbandCap = targetHusbandConv - husbandConv;
+        const unusedWifeCap = targetWifeConv - wifeConv;
 
-		  totalIncomeList.push(totalIncome);
-		  conversionTotals.push(annualRothConversion);
-		  distributionTotals.push(iraDistribution);
-		  rmdTotals.push(combRmd);
+        if (unusedHusbandCap > 0 && wIraAvail > wifeConv) {
+          wifeConv += Math.min(unusedHusbandCap, wIraAvail - wifeConv);
+        } else if (unusedWifeCap > 0 && hIraAvail > husbandConv) {
+          husbandConv += Math.min(unusedWifeCap, hIraAvail - husbandConv);
+        }
 
-		  totalConversions += annualRothConversion;
-		}
+        const annualRothConversion = husbandConv + wifeConv;
+
+        // 6. Combined Taxable Income & Estimated Tax
+        const combinedIncome = totalIncome + annualRothConversion + iraDistribution + combRmd;
+        const estimatedTax = calculateEstimatedFederalTax(combinedIncome, i, hAge, wAge, inflation);
+        totalTaxPaid += estimatedTax;
+
+        // Track Crossover Point
+        if (!crossoverInfo && Math.round(combinedIncome) > Math.round(bracketCeiling)) {
+          crossoverInfo = {
+            year: yr,
+            husbandAge: hAge,
+            wifeAge: wAge,
+            combinedIncome: combinedIncome,
+            ceiling: bracketCeiling,
+            activeBracketPct: activeBracketPct
+          };
+        }
+
+        // 7. Update Balances
+        husbandIra = Math.max(0, (husbandIra - husbandQlacDeduction - hRmd - husbandDistPortion - husbandConv) * growthFactor);
+        wifeIra = Math.max(0, (wifeIra - wifeQlacDeduction - wRmd - wifeDistPortion - wifeConv) * growthFactor);
+        
+        husbandRoth = (husbandRoth + husbandConv) * growthFactor;
+        wifeRoth = (wifeRoth + wifeConv) * growthFactor;
+
+        combinedIraBalances.push(husbandIra + wifeIra);
+        combinedRothBalances.push(husbandRoth + wifeRoth);
+
+        totalIncomeList.push(totalIncome);
+        conversionTotals.push(annualRothConversion);
+        distributionTotals.push(iraDistribution);
+        rmdTotals.push(combRmd);
+
+        totalConversions += annualRothConversion;
+      }
+
       // Format Insight Text Statement
       let insightText = '';
       if (crossoverInfo) {

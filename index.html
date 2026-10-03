@@ -191,14 +191,14 @@
           <label for="husbandIra">Husband Balance</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="husbandIra" class="has-prefix" required min="0" step="100" value="0000">
+            <input type="number" id="husbandIra" class="has-prefix" required min="0" step="100" value="3000000">
           </div>
         </div>
         <div class="form-group">
           <label for="wifeIra">Wife Balance</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="wifeIra" class="has-prefix" required min="0" step="100" value="0000">
+            <input type="number" id="wifeIra" class="has-prefix" required min="0" step="100" value="2000000">
           </div>
         </div>
       </div>
@@ -210,14 +210,14 @@
           <label for="husbandRoth">Husband Roth</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="husbandRoth" class="has-prefix" required min="0" step="100" value="000">
+            <input type="number" id="husbandRoth" class="has-prefix" required min="0" step="100" value="157000">
           </div>
         </div>
         <div class="form-group">
           <label for="wifeRoth">Wife Roth</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="wifeRoth" class="has-prefix" required min="0" step="100" value="000">
+            <input type="number" id="wifeRoth" class="has-prefix" required min="0" step="100" value="75000">
           </div>
         </div>
       </div>
@@ -358,10 +358,10 @@
         const data = JSON.parse(savedData);
         document.getElementById('husbandAge').value = data.husbandAge ?? 68;
         document.getElementById('wifeAge').value = data.wifeAge ?? 65;
-        document.getElementById('husbandIra').value = data.husbandIra ?? 0;
-        document.getElementById('wifeIra').value = data.wifeIra ?? ;
-        document.getElementById('husbandRoth').value = data.husbandRoth ?? 0;
-        document.getElementById('wifeRoth').value = data.wifeRoth ?? 0;
+        document.getElementById('husbandIra').value = data.husbandIra ?? 3000000;
+        document.getElementById('wifeIra').value = data.wifeIra ?? 2000000;
+        document.getElementById('husbandRoth').value = data.husbandRoth ?? 157000;
+        document.getElementById('wifeRoth').value = data.wifeRoth ?? 75000;
         document.getElementById('husbandQlac').value = data.husbandQlac ?? 210000;
         document.getElementById('husbandQlacAge').value = data.husbandQlacAge ?? 74;
         document.getElementById('wifeQlac').value = data.wifeQlac ?? 0;
@@ -372,7 +372,7 @@
         document.getElementById('husbandSsi').value = data.husbandSsi ?? 0;
         document.getElementById('wifeSsi').value = data.wifeSsi ?? 0;
         document.getElementById('husbandSsiStartAge').value = data.husbandSsiStartAge ?? 70;
-        document.getElementById('wifeSsiStartAge').value = data.wifeSsiStartAge ?? 67;
+        document.getElementById('wifeSsiStartAge').value = data.wifeSsiStartAge ?? 70;
         document.getElementById('growthRate').value = data.growthRate ?? 6.0;
         document.getElementById('currentTaxBracket').value = data.currentTaxBracket ?? (data.targetTaxBracket ?? 22);
         document.getElementById('yearsUntilSwitch').value = data.yearsUntilSwitch ?? 3;
