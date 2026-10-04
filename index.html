@@ -176,11 +176,11 @@
       <div class="grid-2">
         <div class="form-group">
           <label for="husbandAge">Husband Age</label>
-          <input type="number" id="husbandAge" required min="18" max="100" value="68">
+          <input type="number" id="husbandAge" required min="18" max="100" value="60">
         </div>
         <div class="form-group">
           <label for="wifeAge">Wife Age</label>
-          <input type="number" id="wifeAge" required min="18" max="100" value="65">
+          <input type="number" id="wifeAge" required min="18" max="100" value="60">
         </div>
       </div>
 
@@ -191,14 +191,14 @@
           <label for="husbandIra">Husband Balance</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="husbandIra" class="has-prefix" required min="0" step="100" value="3000000">
+            <input type="number" id="husbandIra" class="has-prefix" required min="0" step="100" value="0">
           </div>
         </div>
         <div class="form-group">
           <label for="wifeIra">Wife Balance</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="wifeIra" class="has-prefix" required min="0" step="100" value="2000000">
+            <input type="number" id="wifeIra" class="has-prefix" required min="0" step="100" value="0">
           </div>
         </div>
       </div>
@@ -210,14 +210,14 @@
           <label for="husbandRoth">Husband Roth</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="husbandRoth" class="has-prefix" required min="0" step="100" value="157000">
+            <input type="number" id="husbandRoth" class="has-prefix" required min="0" step="100" value="0">
           </div>
         </div>
         <div class="form-group">
           <label for="wifeRoth">Wife Roth</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="wifeRoth" class="has-prefix" required min="0" step="100" value="75000">
+            <input type="number" id="wifeRoth" class="has-prefix" required min="0" step="100" value="0">
           </div>
         </div>
       </div>
@@ -229,7 +229,7 @@
           <label for="husbandQlac">Husband QLAC Amount</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="husbandQlac" class="has-prefix" required min="0" step="1000" value="210000">
+            <input type="number" id="husbandQlac" class="has-prefix" required min="0" step="1000" value="0">
           </div>
         </div>
         <div class="form-group">
@@ -276,7 +276,7 @@
         <label for="ordinaryIncome">Household Ordinary Income</label>
         <div class="input-wrapper">
           <span class="prefix">$</span>
-          <input type="number" id="ordinaryIncome" class="has-prefix" required min="0" step="500" value="120000">
+          <input type="number" id="ordinaryIncome" class="has-prefix" required min="0" step="500" value="0">
         </div>
       </div>
 
@@ -322,7 +322,7 @@
         <div class="form-group">
           <label for="currentTaxBracket">Current Target Bracket</label>
           <div class="input-wrapper">
-            <input type="number" id="currentTaxBracket" class="has-suffix" required min="0" max="50" step="1" value="22">
+            <input type="number" id="currentTaxBracket" class="has-suffix" required min="0" max="50" step="1" value="12">
             <span class="suffix">%</span>
           </div>
         </div>
@@ -333,7 +333,7 @@
         <div class="form-group">
           <label for="futureTaxBracket">Future Target Bracket</label>
           <div class="input-wrapper">
-            <input type="number" id="futureTaxBracket" class="has-suffix" required min="0" max="50" step="1" value="24">
+            <input type="number" id="futureTaxBracket" class="has-suffix" required min="0" max="50" step="1" value="22">
             <span class="suffix">%</span>
           </div>
         </div>
@@ -346,8 +346,10 @@
           <span class="suffix">%</span>
         </div>
       </div>
-
-      <button type="submit" class="btn-submit">Save & View Results →</button>
+	<div class="grid-2" style="margin-top: 24px;">
+	  <button type="button" id="btnClear" class="btn-secondary">Clear Inputs</button>
+	  <button type="submit" class="btn-submit" style="margin-top: 0;">Save & View Results →</button>
+	</div>
     </form>
   </div>
 
@@ -356,27 +358,27 @@
       const savedData = localStorage.getItem('rothQlacInputs');
       if (savedData) {
         const data = JSON.parse(savedData);
-        document.getElementById('husbandAge').value = data.husbandAge ?? 68;
-        document.getElementById('wifeAge').value = data.wifeAge ?? 65;
-        document.getElementById('husbandIra').value = data.husbandIra ?? 3000000;
-        document.getElementById('wifeIra').value = data.wifeIra ?? 2000000;
-        document.getElementById('husbandRoth').value = data.husbandRoth ?? 157000;
-        document.getElementById('wifeRoth').value = data.wifeRoth ?? 75000;
+        document.getElementById('husbandAge').value = data.husbandAge ?? 60;
+        document.getElementById('wifeAge').value = data.wifeAge ?? 60;
+        document.getElementById('husbandIra').value = data.husbandIra ?? 0;
+        document.getElementById('wifeIra').value = data.wifeIra ?? 0;
+        document.getElementById('husbandRoth').value = data.husbandRoth ?? 0;
+        document.getElementById('wifeRoth').value = data.wifeRoth ?? 0;
         document.getElementById('husbandQlac').value = data.husbandQlac ?? 210000;
         document.getElementById('husbandQlacAge').value = data.husbandQlacAge ?? 74;
-        document.getElementById('wifeQlac').value = data.wifeQlac ?? 0;
+        document.getElementById('wifeQlac').value = data.wifeQlac ?? 210000;
         document.getElementById('wifeQlacAge').value = data.wifeQlacAge ?? 74;
         document.getElementById('husbandConversionPct').value = data.husbandConversionPct ?? 75;
         document.getElementById('wifeConversionPct').value = data.wifeConversionPct ?? 25;
-        document.getElementById('ordinaryIncome').value = data.ordinaryIncome ?? 120000;
+        document.getElementById('ordinaryIncome').value = data.ordinaryIncome ?? 100000;
         document.getElementById('husbandSsi').value = data.husbandSsi ?? 0;
         document.getElementById('wifeSsi').value = data.wifeSsi ?? 0;
-        document.getElementById('husbandSsiStartAge').value = data.husbandSsiStartAge ?? 70;
-        document.getElementById('wifeSsiStartAge').value = data.wifeSsiStartAge ?? 70;
+        document.getElementById('husbandSsiStartAge').value = data.husbandSsiStartAge ?? 68;
+        document.getElementById('wifeSsiStartAge').value = data.wifeSsiStartAge ?? 68;
         document.getElementById('growthRate').value = data.growthRate ?? 6.0;
-        document.getElementById('currentTaxBracket').value = data.currentTaxBracket ?? (data.targetTaxBracket ?? 22);
+        document.getElementById('currentTaxBracket').value = data.currentTaxBracket ?? (data.targetTaxBracket ?? 12);
         document.getElementById('yearsUntilSwitch').value = data.yearsUntilSwitch ?? 3;
-        document.getElementById('futureTaxBracket').value = data.futureTaxBracket ?? 24;
+        document.getElementById('futureTaxBracket').value = data.futureTaxBracket ?? 22;
         document.getElementById('targetPctCeiling').value = data.targetPctCeiling ?? 91;
       }
     });
@@ -412,6 +414,18 @@
       localStorage.setItem('rothQlacInputs', JSON.stringify(inputs));
       window.location.href = 'results.html';
     });
+	document.getElementById('btnClear').addEventListener('click', () => {
+	  if (confirm('Are you sure you want to clear all inputs to zero?')) {
+	    // 1. Remove stored user inputs from localStorage
+	    localStorage.removeItem('rothQlacInputs');
+
+	    // 2. Explicitly set all numeric input fields to 0
+	    const inputs = document.querySelectorAll('#scenario-form input[type="number"]');
+	    inputs.forEach(input => {
+	      input.value = 0;
+	    });
+	  }
+	});
   </script>
 </body>
 </html>
