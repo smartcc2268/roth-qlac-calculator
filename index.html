@@ -122,7 +122,7 @@
     .input-wrapper span.prefix { left: 12px; }
     .input-wrapper span.suffix { right: 12px; }
 
-    input[type="number"] {
+    input[type="number"], input.currency-input {
       width: 100%;
       padding: 10px 12px;
       font-size: 0.95rem;
@@ -135,7 +135,7 @@
     input.has-prefix { padding-left: 28px; }
     input.has-suffix { padding-right: 28px; }
 
-    input[type="number"]:focus {
+    input[type="number"]:focus, input.currency-input:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
     }
@@ -156,6 +156,23 @@
 
     .btn-submit:hover {
       background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: #64748b;
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background-color: #475569;
     }
   </style>
 </head>
@@ -191,14 +208,14 @@
           <label for="husbandIra">Husband Balance</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="husbandIra" class="has-prefix" required min="0" step="100" value="0">
+            <input type="text" id="husbandIra" class="currency-input has-prefix" required value="0">
           </div>
         </div>
         <div class="form-group">
           <label for="wifeIra">Wife Balance</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="wifeIra" class="has-prefix" required min="0" step="100" value="0">
+            <input type="text" id="wifeIra" class="currency-input has-prefix" required value="0">
           </div>
         </div>
       </div>
@@ -210,14 +227,14 @@
           <label for="husbandRoth">Husband Roth</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="husbandRoth" class="has-prefix" required min="0" step="100" value="0">
+            <input type="text" id="husbandRoth" class="currency-input has-prefix" required value="0">
           </div>
         </div>
         <div class="form-group">
           <label for="wifeRoth">Wife Roth</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="wifeRoth" class="has-prefix" required min="0" step="100" value="0">
+            <input type="text" id="wifeRoth" class="currency-input has-prefix" required value="0">
           </div>
         </div>
       </div>
@@ -229,7 +246,7 @@
           <label for="husbandQlac">Husband QLAC Amount</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="husbandQlac" class="has-prefix" required min="0" step="1000" value="0">
+            <input type="text" id="husbandQlac" class="currency-input has-prefix" required value="0">
           </div>
         </div>
         <div class="form-group">
@@ -242,7 +259,7 @@
           <label for="wifeQlac">Wife QLAC Amount</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="wifeQlac" class="has-prefix" required min="0" step="1000" value="0">
+            <input type="text" id="wifeQlac" class="currency-input has-prefix" required value="0">
           </div>
         </div>
         <div class="form-group">
@@ -276,7 +293,7 @@
         <label for="ordinaryIncome">Household Ordinary Income</label>
         <div class="input-wrapper">
           <span class="prefix">$</span>
-          <input type="number" id="ordinaryIncome" class="has-prefix" required min="0" step="500" value="0">
+          <input type="text" id="ordinaryIncome" class="currency-input has-prefix" required value="0">
         </div>
       </div>
 
@@ -285,14 +302,14 @@
           <label for="husbandSsi">Husband Social Security (Annual)</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="husbandSsi" class="has-prefix" required min="0" step="100" value="0">
+            <input type="text" id="husbandSsi" class="currency-input has-prefix" required value="0">
           </div>
         </div>
         <div class="form-group">
           <label for="wifeSsi">Wife Social Security (Annual)</label>
           <div class="input-wrapper">
             <span class="prefix">$</span>
-            <input type="number" id="wifeSsi" class="has-prefix" required min="0" step="100" value="0">
+            <input type="text" id="wifeSsi" class="currency-input has-prefix" required value="0">
           </div>
         </div>
       </div>
@@ -346,62 +363,100 @@
           <span class="suffix">%</span>
         </div>
       </div>
-	<div class="grid-2" style="margin-top: 24px;">
-	  <button type="button" id="btnClear" class="btn-secondary">Clear Inputs</button>
-	  <button type="submit" class="btn-submit" style="margin-top: 0;">Save & View Results →</button>
-	</div>
+
+      <div class="grid-2" style="margin-top: 24px;">
+        <button type="button" id="btnClear" class="btn-secondary">Clear Inputs</button>
+        <button type="submit" class="btn-submit" style="margin-top: 0;">Save & View Results →</button>
+      </div>
     </form>
   </div>
 
   <script>
+    // Helper to format numbers with commas
+    function formatCurrency(val) {
+      if (val === '' || isNaN(val)) return '';
+      return Number(val).toLocaleString('en-US');
+    }
+
+    // Helper to strip commas when editing
+    function cleanCurrency(val) {
+      return val.replace(/,/g, '');
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       const savedData = localStorage.getItem('rothQlacInputs');
-      if (savedData) {
-        const data = JSON.parse(savedData);
-        document.getElementById('husbandAge').value = data.husbandAge ?? 60;
-        document.getElementById('wifeAge').value = data.wifeAge ?? 60;
-        document.getElementById('husbandIra').value = data.husbandIra ?? 0;
-        document.getElementById('wifeIra').value = data.wifeIra ?? 0;
-        document.getElementById('husbandRoth').value = data.husbandRoth ?? 0;
-        document.getElementById('wifeRoth').value = data.wifeRoth ?? 0;
-        document.getElementById('husbandQlac').value = data.husbandQlac ?? 210000;
-        document.getElementById('husbandQlacAge').value = data.husbandQlacAge ?? 74;
-        document.getElementById('wifeQlac').value = data.wifeQlac ?? 210000;
-        document.getElementById('wifeQlacAge').value = data.wifeQlacAge ?? 74;
-        document.getElementById('husbandConversionPct').value = data.husbandConversionPct ?? 75;
-        document.getElementById('wifeConversionPct').value = data.wifeConversionPct ?? 25;
-        document.getElementById('ordinaryIncome').value = data.ordinaryIncome ?? 100000;
-        document.getElementById('husbandSsi').value = data.husbandSsi ?? 0;
-        document.getElementById('wifeSsi').value = data.wifeSsi ?? 0;
-        document.getElementById('husbandSsiStartAge').value = data.husbandSsiStartAge ?? 68;
-        document.getElementById('wifeSsiStartAge').value = data.wifeSsiStartAge ?? 68;
-        document.getElementById('growthRate').value = data.growthRate ?? 6.0;
-        document.getElementById('currentTaxBracket').value = data.currentTaxBracket ?? (data.targetTaxBracket ?? 12);
-        document.getElementById('yearsUntilSwitch').value = data.yearsUntilSwitch ?? 3;
-        document.getElementById('futureTaxBracket').value = data.futureTaxBracket ?? 22;
-        document.getElementById('targetPctCeiling').value = data.targetPctCeiling ?? 91;
-      }
+      const data = savedData ? JSON.parse(savedData) : {};
+
+      // Populate currency fields with formatted commas
+      const currencyFields = ['husbandIra', 'wifeIra', 'husbandRoth', 'wifeRoth', 'husbandQlac', 'wifeQlac', 'ordinaryIncome', 'husbandSsi', 'wifeSsi'];
+      
+      const defaults = {
+        husbandAge: 60, wifeAge: 60, husbandIra: 0, wifeIra: 0, husbandRoth: 0, wifeRoth: 0,
+        husbandQlac: 0, husbandQlacAge: 74, wifeQlac: 0, wifeQlacAge: 74,
+        husbandConversionPct: 75, wifeConversionPct: 25, ordinaryIncome: 0,
+        husbandSsi: 0, wifeSsi: 0, husbandSsiStartAge: 70, wifeSsiStartAge: 70,
+        growthRate: 6.0, currentTaxBracket: 12, yearsUntilSwitch: 3, futureTaxBracket: 22, targetPctCeiling: 91
+      };
+
+      // Set standard inputs
+      document.getElementById('husbandAge').value = data.husbandAge ?? defaults.husbandAge;
+      document.getElementById('wifeAge').value = data.wifeAge ?? defaults.wifeAge;
+      document.getElementById('husbandQlacAge').value = data.husbandQlacAge ?? defaults.husbandQlacAge;
+      document.getElementById('wifeQlacAge').value = data.wifeQlacAge ?? defaults.wifeQlacAge;
+      document.getElementById('husbandConversionPct').value = data.husbandConversionPct ?? defaults.husbandConversionPct;
+      document.getElementById('wifeConversionPct').value = data.wifeConversionPct ?? defaults.wifeConversionPct;
+      document.getElementById('husbandSsiStartAge').value = data.husbandSsiStartAge ?? defaults.husbandSsiStartAge;
+      document.getElementById('wifeSsiStartAge').value = data.wifeSsiStartAge ?? defaults.wifeSsiStartAge;
+      document.getElementById('growthRate').value = data.growthRate ?? defaults.growthRate;
+      document.getElementById('currentTaxBracket').value = data.currentTaxBracket ?? defaults.currentTaxBracket;
+      document.getElementById('yearsUntilSwitch').value = data.yearsUntilSwitch ?? defaults.yearsUntilSwitch;
+      document.getElementById('futureTaxBracket').value = data.futureTaxBracket ?? defaults.futureTaxBracket;
+      document.getElementById('targetPctCeiling').value = data.targetPctCeiling ?? defaults.targetPctCeiling;
+
+      // Set currency inputs with formatting
+      currencyFields.forEach(id => {
+        const val = data[id] ?? defaults[id];
+        document.getElementById(id).value = formatCurrency(val);
+      });
+
+      // Attach Focus & Blur listeners for smooth comma editing
+      currencyFields.forEach(id => {
+        const el = document.getElementById(id);
+        
+        el.addEventListener('focus', (e) => {
+          e.target.value = cleanCurrency(e.target.value);
+        });
+
+        el.addEventListener('blur', (e) => {
+          const raw = cleanCurrency(e.target.value);
+          if (raw !== '' && !isNaN(raw)) {
+            e.target.value = formatCurrency(raw);
+          }
+        });
+      });
     });
 
     document.getElementById('scenario-form').addEventListener('submit', (e) => {
       e.preventDefault();
 
+      const getVal = (id) => parseFloat(cleanCurrency(document.getElementById(id).value)) || 0;
+
       const inputs = {
         husbandAge: parseFloat(document.getElementById('husbandAge').value),
         wifeAge: parseFloat(document.getElementById('wifeAge').value),
-        husbandIra: parseFloat(document.getElementById('husbandIra').value),
-        wifeIra: parseFloat(document.getElementById('wifeIra').value),
-        husbandRoth: parseFloat(document.getElementById('husbandRoth').value),
-        wifeRoth: parseFloat(document.getElementById('wifeRoth').value),
-        husbandQlac: parseFloat(document.getElementById('husbandQlac').value),
+        husbandIra: getVal('husbandIra'),
+        wifeIra: getVal('wifeIra'),
+        husbandRoth: getVal('husbandRoth'),
+        wifeRoth: getVal('wifeRoth'),
+        husbandQlac: getVal('husbandQlac'),
         husbandQlacAge: parseFloat(document.getElementById('husbandQlacAge').value),
-        wifeQlac: parseFloat(document.getElementById('wifeQlac').value),
+        wifeQlac: getVal('wifeQlac'),
         wifeQlacAge: parseFloat(document.getElementById('wifeQlacAge').value),
         husbandConversionPct: parseFloat(document.getElementById('husbandConversionPct').value),
         wifeConversionPct: parseFloat(document.getElementById('wifeConversionPct').value),
-        ordinaryIncome: parseFloat(document.getElementById('ordinaryIncome').value),
-        husbandSsi: parseFloat(document.getElementById('husbandSsi').value),
-        wifeSsi: parseFloat(document.getElementById('wifeSsi').value),
+        ordinaryIncome: getVal('ordinaryIncome'),
+        husbandSsi: getVal('husbandSsi'),
+        wifeSsi: getVal('wifeSsi'),
         husbandSsiStartAge: parseFloat(document.getElementById('husbandSsiStartAge').value),
         wifeSsiStartAge: parseFloat(document.getElementById('wifeSsiStartAge').value),
         growthRate: parseFloat(document.getElementById('growthRate').value),
@@ -414,18 +469,20 @@
       localStorage.setItem('rothQlacInputs', JSON.stringify(inputs));
       window.location.href = 'results.html';
     });
-	document.getElementById('btnClear').addEventListener('click', () => {
-	  if (confirm('Are you sure you want to clear all inputs to zero?')) {
-	    // 1. Remove stored user inputs from localStorage
-	    localStorage.removeItem('rothQlacInputs');
 
-	    // 2. Explicitly set all numeric input fields to 0
-	    const inputs = document.querySelectorAll('#scenario-form input[type="number"]');
-	    inputs.forEach(input => {
-	      input.value = 0;
-	    });
-	  }
-	});
+    document.getElementById('btnClear').addEventListener('click', () => {
+      if (confirm('Are you sure you want to clear all inputs to zero?')) {
+        localStorage.removeItem('rothQlacInputs');
+        
+        // Reset numeric fields
+        const numInputs = document.querySelectorAll('#scenario-form input[type="number"]');
+        numInputs.forEach(input => { input.value = 0; });
+
+        // Reset currency fields
+        const currencyFields = ['husbandIra', 'wifeIra', 'husbandRoth', 'wifeRoth', 'husbandQlac', 'wifeQlac', 'ordinaryIncome', 'husbandSsi', 'wifeSsi'];
+        currencyFields.forEach(id => { document.getElementById(id).value = '0'; });
+      }
+    });
   </script>
 </body>
 </html>
